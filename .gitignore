@@ -1,0 +1,6 @@
+.venv
+.idea
+data/json/*
+data/embeddings/*
+.ropeproject
+__pycache__
