@@ -24,3 +24,26 @@ def get_recommendations(anime_id: int, limit: int = 10) -> List[int]:
 
     similar_indices = similarities.argsort()[::-1][1:limit + 1]
     return [int(index_to_id[i]) for i in similar_indices]
+
+def get_recommendations_by_list(anime_ids: List[int], limit: int = 10) -> List[int]:
+    valid_indices = [id_to_index[str(i)] for i in anime_ids if str(i) in id_to_index]
+
+    if not valid_indices:
+        return []
+
+    vectors = [embeddings[int(idx)] for idx in valid_indices]
+    query_vector = np.mean(vectors, axis=0).reshape(1, -1)
+
+    similarities = cosine_similarity(query_vector, embeddings).flatten()
+    similar_indices = similarities.argsort()[::-1]
+
+    recommended_ids = []
+    for i in similar_indices:
+        candidate_id = int(index_to_id[i])
+        if candidate_id not in anime_ids:
+            recommended_ids.append(candidate_id)
+        if len(recommended_ids) >= limit:
+            break
+
+    return recommended_ids
+
