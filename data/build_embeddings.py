@@ -3,13 +3,16 @@ import numpy as np
 import json
 import os
 from sentence_transformers import SentenceTransformer
+from logging import getLogger
+
+logger = getLogger();
 
 script_path = os.path.dirname(os.path.abspath(__file__))
 json_dir_path = os.path.join(script_path, "json")
 embeddings_dir_path = os.path.join(script_path, "embeddings")
 data_path = os.path.join(script_path, "anime-dataset.csv")
 
-emebeddings_path = os.path.join(embeddings_dir_path, "anime_embeddings.npy")
+embeddings_path = os.path.join(embeddings_dir_path, "anime_embeddings.npy")
 
 def main():
 
@@ -18,6 +21,10 @@ def main():
 
     if not os.path.exists(json_dir_path):
         os.makedirs(json_dir_path)
+
+    if not os.path.exists(data_path) and not os.path.isfile(data_path):
+        logger.error("Unable to find csv dataset")
+        return
 
     anime_df = pd.read_csv(data_path, delimiter="\t")
 
@@ -41,7 +48,12 @@ def main():
     texts = ["query: " + text for text in anime_df['content'].tolist()]
     embeddings = model.encode(texts, show_progress_bar=True, batch_size=64)
 
-    np.save(embeddings_dir_path, embeddings)
+    try:
+        np.save(embeddings_path, embeddings)
+    except Exception as e:
+        fallback_path = os.path.join(os.getcwd(), "embeddings.npy")
+        np.save(fallback_path, embeddings)
+        logger.error(f"An error occurred: {e}.\nEmbeddings will be saved at: {fallback_path}")
 
     id_to_index = {int(row["Id"]): i for i, row in anime_df.iterrows()}
     index_to_id = {i: int(row["Id"]) for i, row in anime_df.iterrows()}
