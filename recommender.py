@@ -3,8 +3,9 @@ import json
 
 from typing import List
 from sklearn.metrics.pairwise import cosine_similarity
+from data.build_embeddings import embeddings_path
 
-embeddings = np.load("data/embeddings/anime_embeddings.npy")
+embeddings = np.load(embeddings_path)
 
 with open("data/json/id_to_index.json", "r") as f:
     id_to_index = json.load(f)

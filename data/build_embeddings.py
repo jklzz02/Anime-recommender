@@ -1,10 +1,25 @@
 import pandas as pd
 import numpy as np
 import json
+import os
 from sentence_transformers import SentenceTransformer
 
+script_path = os.path.dirname(os.path.abspath(__file__))
+json_dir_path = os.path.join(script_path, "json")
+embeddings_dir_path = os.path.join(script_path, "embeddings")
+data_path = os.path.join(script_path, "anime-dataset.csv")
+
+emebeddings_path = os.path.join(embeddings_dir_path, "anime_embeddings.npy")
+
 def main():
-    anime_df = pd.read_csv("anime-dataset.csv", delimiter="\t")
+
+    if not os.path.exists(embeddings_dir_path):
+        os.makedirs(embeddings_dir_path)
+
+    if not os.path.exists(json_dir_path):
+        os.makedirs(json_dir_path)
+
+    anime_df = pd.read_csv(data_path, delimiter="\t")
 
     anime_df.columns = [
         "Id", "Name", "Started_airing", "Score", "Release_year",
@@ -26,19 +41,18 @@ def main():
     texts = ["query: " + text for text in anime_df['content'].tolist()]
     embeddings = model.encode(texts, show_progress_bar=True, batch_size=64)
 
-    np.save("embeddings/anime_embeddings.npy", embeddings)
+    np.save(embeddings_dir_path, embeddings)
 
     id_to_index = {int(row["Id"]): i for i, row in anime_df.iterrows()}
     index_to_id = {i: int(row["Id"]) for i, row in anime_df.iterrows()}
 
-    with open("json/id_to_index.json", "w") as f:
+    with open(os.path.join(json_dir_path, "id_to_index.json"), "w") as f:
         json.dump(id_to_index, f)
 
-    with open("json/index_to_id.json", "w") as f:
+    with open(os.path.join(json_dir_path, "index_to_id.json"), "w") as f:
         json.dump(index_to_id, f)
 
     print("Embeddings created and cached.")
-
 
 if __name__ == "__main__":
     main()
