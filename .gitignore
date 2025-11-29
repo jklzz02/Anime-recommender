@@ -4,3 +4,4 @@ data/json/*
 data/embeddings/*
 .ropeproject
 __pycache__
+data/anime-ratings.csv
