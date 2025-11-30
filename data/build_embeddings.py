@@ -7,10 +7,10 @@ from logging import getLogger
 
 logger = getLogger()
 
-script_path = os.path.dirname(os.path.abspath(__file__))
-json_dir_path = os.path.join(script_path, "json")
-embeddings_dir_path = os.path.join(script_path, "embeddings")
-data_path = os.path.join(script_path, "anime-dataset.csv")
+data_dir_path = os.path.dirname(os.path.abspath(__file__))
+json_dir_path = os.path.join(data_dir_path, "json")
+embeddings_dir_path = os.path.join(data_dir_path, "embeddings")
+data_path = os.path.join(data_dir_path, "anime-dataset.csv")
 
 content_embeddings_path = os.path.join(embeddings_dir_path, "anime_embeddings.npy")
 nlp_embeddings_path = os.path.join(embeddings_dir_path, "anime_nlp_embeddings.npy")

@@ -33,8 +33,7 @@ with open("data/json/rating_stats.json", "r") as f:
 
 model = SentenceTransformer("intfloat/e5-base")
 
-def get_cf_recommendations_for_user(user_id: int, limit: int = 10, 
-                                    exclude_rated: bool = True) -> List[Tuple[int, float]]:
+def get_cf_recommendations_for_user(user_id: int, limit: int = 10) -> List[Tuple[int, float]]:
     """
     Get collaborative filtering recommendations for a specific user.
     
@@ -56,7 +55,7 @@ def get_cf_recommendations_for_user(user_id: int, limit: int = 10,
     similarities = cosine_similarity(user_vector, anime_cf_embeddings).flatten()
     
     user_mean = user_stats.get(user_id, {}).get('mean', global_mean)
-    predicted_ratings = user_mean + similarities * 5  # Scale factor
+    predicted_ratings = user_mean + similarities * 5
     predicted_ratings = np.clip(predicted_ratings, 1, 10)
     
     sorted_indices = predicted_ratings.argsort()[::-1]
@@ -94,7 +93,7 @@ def get_cf_similar_anime(anime_id: int, limit: int = 10) -> List[Tuple[int, floa
     
     similarities = cosine_similarity(anime_vector, anime_cf_embeddings).flatten()
     
-    sorted_indices = similarities.argsort()[::-1][1:limit + 1]  # Exclude self
+    sorted_indices = similarities.argsort()[::-1][1:limit + 1]
     
     return [(cf_idx_to_anime[idx], float(similarities[idx])) for idx in sorted_indices]
 
@@ -150,7 +149,7 @@ def get_hybrid_recommendations(user_id: int,
     content_weight = content_weight / total_weight
     
     cf_recs = get_cf_recommendations_for_user(user_id, limit=limit * 3)
-    cf_scores = {anime_id: score / 10.0 for anime_id, score in cf_recs}  # Normalize to 0-1
+    cf_scores = {anime_id: score / 10.0 for anime_id, score in cf_recs}
     
     content_scores = {}
     if user_anime_list:
