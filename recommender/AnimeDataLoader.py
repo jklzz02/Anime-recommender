@@ -4,7 +4,7 @@ import json
 import os
 from typing import Optional, Dict, List, Tuple
 from functools import lru_cache
-from data.build_embeddings import data_dir_path
+from data.build_embeddings import data_path
 import logging
 
 logging.basicConfig(
@@ -14,8 +14,8 @@ logging.basicConfig(
 
 logger = logging.getLogger(__name__)
 
-json_dir_path = os.path.join(data_dir_path, "json")
-data_path = os.path.join(data_dir_path, "anime-dataset.csv")
+json_dir_path = os.path.join(os.path.dirname(data_path), "json")
+data_path = os.path.join(os.path.dirname(data_path), "anime-dataset.csv")
 id_to_index_path = os.path.join(json_dir_path, "id_to_index.json")
 
 class AnimeDataLoaderError(Exception):
@@ -24,7 +24,7 @@ class AnimeDataLoaderError(Exception):
 
 class AnimeDataLoader:
     """
-    Production-ready anime data loader using existing embeddings and mappings.
+    anime data loader using existing embeddings and mappings.
     
     Loads anime data from the same CSV used to build embeddings, ensuring
     consistency between embeddings and anime details.
@@ -125,7 +125,7 @@ class AnimeDataLoader:
                     
                     self._anime_dict[anime_id] = {
                         "id": anime_id,
-                        "name": self._safe_convert(row["Name"], str, "Unknown"),
+                        "title": self._safe_convert(row["Name"], str, "Unknown"),
                         "started_airing": self._safe_convert(row["Started_airing"], str),
                         "score": self._safe_convert(row["Score"], float),
                         "release_year": self._safe_convert(row["Release_year"], int),
@@ -252,9 +252,10 @@ class AnimeDataLoader:
                     
                     anime = self.get_anime(anime_id)
                     if anime:
+                        result = anime.copy()
                         if include_score:
-                            anime["recommendation_score"] = score
-                        enriched.append(anime)
+                            result["recommendation_score"] = score
+                        enriched.append(result)
                         
                 except (ValueError, TypeError, IndexError):
                     continue
@@ -299,9 +300,10 @@ class AnimeDataLoader:
                     
                     anime = self.get_anime(anime_id)
                     if anime:
-                        anime["recommendation_score"] = score
-                        anime["score_breakdown"] = breakdown
-                        enriched.append(anime)
+                        result = anime.copy()
+                        result["recommendation_score"] = score
+                        result["score_breakdown"] = breakdown
+                        enriched.append(result)
                         
                 except (ValueError, TypeError, IndexError):
                     continue
