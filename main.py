@@ -1,5 +1,6 @@
 from typing import List
 from fastapi import FastAPI, HTTPException, Query, status
+from settings import settings
 
 from models.models import (
     AnimeDetail,
@@ -451,4 +452,8 @@ async def get_examples():
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run(app,
+                host=settings.host,
+                port=settings.port,
+                access_log=settings.environment.is_development,
+                log_level="info" if settings.environment.is_production else "debug")
