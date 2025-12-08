@@ -27,7 +27,7 @@ class Settings(BaseSettings):
 
     @property
     def allowed_cors_origins(self) -> list[str]:
-        return self.allowed_domains.split(",")
+        return self.allowed_domains.strip().split(",") if self.allowed_domains.strip() else []
 
     model_config = SettingsConfigDict(env_file=".env")
 
