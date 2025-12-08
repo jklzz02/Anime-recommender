@@ -371,6 +371,19 @@ def enrich_simple_recommendations(anime_ids: List[int]) -> List[dict]:
         logger.error(f"Error in enrich_simple_recommendations: {e}")
         return []
 
+def enrich_recommendation_with_similarity(anime_tuple: List[Tuple[int, float]]) -> list[Dict]:
+    """Enrich a list of anime IDs with full details"""
+    try:
+        anime = get_anime_data_loader().get_anime_batch([aid for aid, _ in anime_tuple])
+        for item in anime:
+            score = next((s for aid, s in anime_tuple if aid == item["id"]), 0.0)
+            item["similarity_score"] = score
+
+        return anime
+    except Exception as e:
+        logger.error(f"Error in enrich_recommendation_with_similarity: {e}")
+        return []
+
 def enrich_scored_recommendations(recommendations: List[Tuple[int, float]]) -> List[dict]:
     """Enrich recommendations with scores: [(anime_id, score), ...]"""
     try:

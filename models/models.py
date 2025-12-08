@@ -82,3 +82,8 @@ class SimilarUserResponse(BaseModel):
     """Response for similar users"""
     user_id: int
     similarity_score: float = Field(..., ge=0, le=1)
+
+class HybridSimilarAnimeResponse(BaseModel):
+    """Response for similar anime"""
+    anime_id: int
+    similarity_score: float
