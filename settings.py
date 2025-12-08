@@ -20,6 +20,7 @@ class Settings(BaseSettings):
     host: str
     port: int
     environment: Environment
+    version: str
 
     model_config = SettingsConfigDict(env_file=".env")
 

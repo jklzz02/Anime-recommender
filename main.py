@@ -10,7 +10,7 @@ from controllers import (
 app = FastAPI(
     title="Anime Recommendation API",
     description="Hybrid recommendation system combining content-based, collaborative filtering, and NLP",
-    version="1.0.0"
+    version=settings.version
 )
 
 app.include_router(healt_controller.router)

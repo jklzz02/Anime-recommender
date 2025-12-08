@@ -1,4 +1,5 @@
 from fastapi import  APIRouter, Request
+from settings import settings
 from recommender.AnimeDataLoader import get_loader_status
 
 router = APIRouter(prefix="/v1", tags=["Health"])
@@ -8,7 +9,7 @@ async def root():
     """Health check endpoint"""
     return {
         "status": "running",
-        "version": "2.0.0",
+        "version": settings.version,
         "features": [
             "content-based recommendations",
             "collaborative filtering",
@@ -32,7 +33,7 @@ async def health_check(request: Request):
     loader_status = get_loader_status()
     return {
         "status": "healthy" if loader_status["is_loaded"] else "degraded",
-        "version": "2.0.0",
+        "version": settings.version,
         "anime_loader": loader_status,
         "endpoints": endpoints
     }
