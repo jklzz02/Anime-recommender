@@ -217,31 +217,3 @@ def get_high_compatibility_recommendations(user_anime_ids: List[int],
             break
     
     return recommendations
-
-
-# ============================================
-# EXAMPLE USAGE
-# ============================================
-
-if __name__ == "__main__":
-    # Example 1: Original content-based recommendation
-    print("Example 1: Content-based recommendations")
-    recs = get_recommendations(anime_id=1, limit=5)
-    print(f"Similar anime to ID 1: {recs}\n")
-    
-    # Example 2: NLP text-based recommendation
-    print("Example 2: Text-based recommendations")
-    text_recs = get_recommendations_from_text("dark psychological anime with complex characters", limit=5)
-    print(f"Recommendations for 'dark psychological anime': {text_recs}\n")
-    
-    # Example 3: Compatibility scoring
-    print("Example 3: Compatibility scoring")
-    user_list = [1, 5, 10, 20]  # User's watched anime
-    target = 50  # Anime to score
-    score = calculate_compatibility_score(target, user_list)
-    print(f"Compatibility score for anime {target}: {score}/100\n")
-    
-    # Example 4: High compatibility recommendations
-    print("Example 4: High compatibility recommendations")
-    compat_recs = get_high_compatibility_recommendations(user_list, limit=5, min_score=60)
-    print(f"High compatibility recommendations: {compat_recs}")

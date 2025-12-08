@@ -47,24 +47,18 @@ class CompatibilityBatchRequest(BaseModel):
     user_anime_ids: List[int]
 
 class HybridRecommendationRequest(BaseModel):
-    user_id: int
-    user_anime_list: Optional[List[int]] = None
+    user_anime_list: List[int] = []
     limit: int = Field(default=10, ge=1, le=100)
     cf_weight: float = Field(default=0.5, ge=0, le=1)
     content_weight: float = Field(default=0.5, ge=0, le=1)
 
 class HybridTextRecommendationRequest(BaseModel):
-    user_id: int
     text_query: str
+    user_anime_list: List[int] = []
     limit: int = Field(default=10, ge=1, le=100)
     cf_weight: float = Field(default=0.33, ge=0, le=1)
     content_weight: float = Field(default=0.33, ge=0, le=1)
     nlp_weight: float = Field(default=0.34, ge=0, le=1)
-
-class ColdStartRequest(BaseModel):
-    text_query: str
-    favorite_genres: Optional[List[str]] = None
-    limit: int = Field(default=10, ge=1, le=100)
 
 class CompatibilityResponse(BaseModel):
     """Response for compatibility scoring"""
@@ -79,7 +73,7 @@ class CompatibilityBatchResponse(BaseModel):
 
 class PredictionResponse(BaseModel):
     """Response for rating prediction"""
-    user_id: int
+    user_favourites: List[int]
     anime_id: int
     predicted_rating: float = Field(..., ge=1, le=10)
     scale: str = "1-10"
