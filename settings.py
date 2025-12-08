@@ -21,6 +21,13 @@ class Settings(BaseSettings):
     port: int
     environment: Environment
     version: str
+    allowed_domains: str
+    ssl_keyfile_path: str
+    ssl_certfile_path: str
+
+    @property
+    def allowed_cors_origins(self) -> list[str]:
+        return self.allowed_domains.split(",")
 
     model_config = SettingsConfigDict(env_file=".env")
 
