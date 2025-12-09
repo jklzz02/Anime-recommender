@@ -17,7 +17,24 @@ from recommender.hybrid_recommender import (
 
 router = APIRouter(prefix="/v1", tags=["Collaborative filtering"])
 
-@router.get("/cf/recommend/user", response_model=List[RecommendedAnime])
+@router.get("/cf/recommend/user", response_model=List[int])
+def cf_recommend_for_user_ids(
+        favourite_anime_ids: List[int] = Query(..., description="List of user's favourite anime ids."),
+        limit: int = Query(default=10, ge=1, le=100)
+):
+    """Get collaborative filtering recommendations as anime IDs"""
+    try:
+        results = get_cf_recommendations_from_favorites(favourite_anime_ids, limit)
+        if not results:
+            raise HTTPException(status_code=404, detail="User not found in the system.")
+
+        return [aid for aid, _ in results]
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error getting CF recommendations: {str(e)}")
+
+@router.get("/cf/recommend/user/detailed", response_model=List[RecommendedAnime])
 def cf_recommend_for_user(
         favourite_anime_ids: List[int] = Query(..., description="List of user's favourite anime ids."),
         limit: int = Query(default=10, ge=1, le=100)
@@ -38,9 +55,25 @@ def cf_recommend_for_user(
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error getting CF recommendations: {str(e)}")
 
+@router.get("/cf/recommend", response_model=List[int])
+def cf_recommend_anime(
+        anime_id: int = Query(..., description="Anime ID"),
+        limit: int = Query(default=10, ge=1, le=100)
+):
+    """Get collaborative filtering recommendations based on an anime ID"""
+    try:
+        results = get_cf_similar_anime(anime_id, limit)
+        if not results:
+            raise HTTPException(status_code=404, detail="Anime not found in CF system.")
 
-@router.get("/cf/similar/anime", response_model=List[RecommendedAnime])
-def cf_similar_anime(
+        return [aid for aid, _ in results]
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error getting CF recommendations: {str(e)}")
+
+@router.get("/cf/recommend/detailed", response_model=List[RecommendedAnime])
+def cf_recommend_anime_detailed(
         anime_id: int = Query(..., description="Anime ID"),
         limit: int = Query(default=10, ge=1, le=100)
 ):
@@ -59,7 +92,6 @@ def cf_similar_anime(
         raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error finding similar anime: {str(e)}")
-
 
 @router.get("/cf/predict", response_model=PredictionResponse)
 def predict_rating(
@@ -81,7 +113,6 @@ def predict_rating(
         raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error predicting rating: {str(e)}")
-
 
 @router.get("/cf/similar/users", response_model=List[SimilarUserResponse])
 def similar_users(
