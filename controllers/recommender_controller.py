@@ -1,6 +1,6 @@
 from typing import List
 from fastapi import APIRouter, HTTPException, Query
-from models.models import RecommendedAnime, CompatibilityResponse, CompatibilityBatchResponse, CompatibilityBatchRequest
+from models.models import CompatibilityRequest, RecommendedAnime, CompatibilityResponse, CompatibilityBatchResponse, CompatibilityBatchRequest
 from recommender.AnimeDataLoader import enrich_scored_recommendations, get_anime_details
 
 from recommender.recommender import (
@@ -91,32 +91,25 @@ def recommend_from_text_detailed(
         raise HTTPException(status_code=500, detail=f"Error processing text query: {str(e)}")
 
 
-@router.get("/compatibility/score", response_model=CompatibilityResponse, tags=["Compatibility"])
-def get_compatibility(
-        target_anime_id: int = Query(..., description="Anime to score"),
-        user_anime_ids: List[int] = Query(..., description="User's watched/liked anime")
-):
+@router.post("/compatibility/score", response_model=CompatibilityResponse, tags=["Compatibility"])
+def get_compatibility(request: CompatibilityRequest):
     """Calculate compatibility score (1-100) for a target anime"""
     try:
-        score = calculate_compatibility_score(target_anime_id, user_anime_ids)
+        score = calculate_compatibility_score(request.target_anime_id, request.user_favourite_ids)
         return CompatibilityResponse(
-            target_anime_id=target_anime_id,
+            target_anime_id=request.target_anime_id,
             compatibility_score=score
         )
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error calculating compatibility: {str(e)}")
 
 
-@router.get("/compatibility/score/detailed", tags=["Compatibility"])
-def get_compatibility_detailed(
-        target_anime_id: int = Query(..., description="Anime to score"),
-        user_anime_ids: List[int] = Query(..., description="User's watched/liked anime")
-):
+@router.post("/compatibility/score/detailed", tags=["Compatibility"])
+def get_compatibility_detailed(request: CompatibilityRequest):
     """Get compatibility score with full anime details"""
     try:
-        score = calculate_compatibility_score(target_anime_id, user_anime_ids)
-        anime = get_anime_details(target_anime_id)
-
+        score = calculate_compatibility_score(request.target_anime_id, request.user_favourite_ids)
+        anime = get_anime_details(request.target_anime_id)
         if not anime:
             raise HTTPException(status_code=404, detail="Anime not found")
 
@@ -137,7 +130,7 @@ def get_compatibility_batch(request: CompatibilityBatchRequest):
     try:
         scores = calculate_compatibility_scores_batch(
             request.target_anime_ids,
-            request.user_anime_ids
+            request.user_favourite_ids
         )
         return CompatibilityBatchResponse(scores=scores)
     except Exception as e:

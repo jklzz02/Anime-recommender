@@ -42,9 +42,17 @@ class DetailedRecommendationResponse(BaseModel):
     score: float
     score_breakdown: Optional[Dict[str, float]] = None
 
+class CollaborativeRecommendationRequest(BaseModel):
+    user_favourite_ids: List[int] = []
+    limit: int = Field(default=10, ge=1, le=100)
+
+class CompatibilityRequest(BaseModel):
+    target_anime_id: int
+    user_favourite_ids: List[int]
+
 class CompatibilityBatchRequest(BaseModel):
     target_anime_ids: List[int]
-    user_anime_ids: List[int]
+    user_favourite_ids: List[int]
 
 class HybridRecommendationRequest(BaseModel):
     user_anime_list: List[int] = []
