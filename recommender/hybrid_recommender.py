@@ -27,7 +27,7 @@ with open("data/json/rating_stats.json", "r") as f:
     rating_stats = json.load(f)
     global_mean = rating_stats["global_mean"]
 
-model = SentenceTransformer("intfloat/e5-base")
+model = SentenceTransformer("sentence-transformers/all-mpnet-base-v2")
 
 def get_cf_recommendations_from_favorites(user_anime_ids: List[int], limit: int = 10) -> List[Tuple[int, float]]:
     """CF recommendations based on a list of favorite anime IDs."""
@@ -175,3 +175,118 @@ def get_similar_users_from_favorites(user_anime_ids: List[int], limit: int = 10)
 
     sorted_indices = similarities.argsort()[::-1][:limit]
     return [(idx, float(similarities[idx])) for idx in sorted_indices]
+
+def calculate_compatibility_score(
+    target_anime_id: int, 
+    user_anime_ids: List[int],
+    user_ratings: Optional[Dict[int, float]] = None,
+    score_floor: float = 50.0,
+    cf_boost: float = 1.2,
+) -> float:
+    """
+    Enhanced compatibility using hybrid CF + content approach with better calibration.
+    
+    Args:
+        target_anime_id: The anime to score
+        user_anime_ids: List of anime IDs the user has watched/liked
+        user_ratings: Optional dict of {anime_id: rating} for weighting (1-10 scale)
+        score_floor: Minimum compatibility score (default 50)
+        cf_boost: Multiplier for CF importance when available (default 1.2)
+    
+    Returns:
+        Compatibility score from 1 to 100
+    """
+    target_content_idx = id_to_index.get(str(target_anime_id))
+    target_cf_idx = anime_to_cf_idx.get(target_anime_id)
+    
+    if target_content_idx is None or not user_anime_ids:
+        return 0.0
+    
+    cf_user_ids = [aid for aid in user_anime_ids if aid in anime_to_cf_idx]
+    content_user_indices = [
+        id_to_index[str(aid)] for aid in user_anime_ids 
+        if str(aid) in id_to_index
+    ]
+    
+    if not cf_user_ids and not content_user_indices:
+        return 0.0
+    
+    cf_weights = None
+    content_weights = None
+    
+    if user_ratings:
+        if cf_user_ids:
+            cf_weights = np.array([
+                max(0, user_ratings.get(aid, 7.0) - 5.0) / 5.0
+                for aid in cf_user_ids
+            ])
+            cf_weights = np.power(cf_weights + 0.5, 2)
+            if cf_weights.sum() > 0:
+                cf_weights = cf_weights / cf_weights.sum()
+            else:
+                cf_weights = np.ones(len(cf_user_ids)) / len(cf_user_ids)
+        
+        if content_user_indices:
+            content_weights = np.array([
+                max(0, user_ratings.get(int(index_to_id[idx]), 7.0) - 5.0) / 5.0
+                for idx in content_user_indices
+            ])
+            content_weights = np.power(content_weights + 0.5, 2)
+            if content_weights.sum() > 0:
+                content_weights = content_weights / content_weights.sum()
+            else:
+                content_weights = np.ones(len(content_user_indices)) / len(content_user_indices)
+    
+    cf_similarity = None
+    content_similarity = None
+    
+    if target_cf_idx is not None and cf_user_ids:
+        target_cf_vec = anime_cf_embeddings[target_cf_idx].reshape(1, -1)
+        user_cf_vecs = anime_cf_embeddings[[anime_to_cf_idx[aid] for aid in cf_user_ids]]
+        
+        cf_sims = cosine_similarity(target_cf_vec, user_cf_vecs).flatten()
+        
+        if cf_weights is not None:
+            cf_similarity = np.average(cf_sims, weights=cf_weights)
+        else:
+            cf_similarity = np.max(cf_sims) * 0.7 + np.mean(cf_sims) * 0.3
+        
+        cf_similarity = (cf_similarity + 1.0) / 2.0
+    
+    if content_user_indices:
+        target_content_vec = compatibility_embeddings[int(target_content_idx)].reshape(1, -1)
+        user_content_vecs = compatibility_embeddings[content_user_indices]
+        
+        content_sims = cosine_similarity(target_content_vec, user_content_vecs).flatten()
+        
+        if content_weights is not None:
+            content_similarity = np.average(content_sims, weights=content_weights)
+        else:
+            content_similarity = np.max(content_sims) * 0.7 + np.mean(content_sims) * 0.3
+    
+    if cf_similarity is not None and content_similarity is not None:
+        cf_weight = 0.65 * cf_boost
+        content_weight = 0.35
+        total_weight = cf_weight + content_weight
+        cf_weight /= total_weight
+        content_weight /= total_weight
+        
+        final_similarity = cf_weight * cf_similarity + content_weight * content_similarity
+        
+    elif cf_similarity is not None:
+        final_similarity = cf_similarity
+        
+    elif content_similarity is not None:
+        final_similarity = content_similarity
+    else:
+        return 0.0
+    
+    if final_similarity >= 0.7:
+        score = 80 + (final_similarity - 0.7) / 0.3 * 20
+    elif final_similarity >= 0.5:
+        score = score_floor + (final_similarity - 0.5) / 0.2 * (80 - score_floor)
+    else:
+        score = 1 + (final_similarity / 0.5) * (score_floor - 1)
+    
+    score = np.clip(score, 1, 100)
+    return float(score)

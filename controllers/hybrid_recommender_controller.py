@@ -1,13 +1,18 @@
 from typing import List
 from fastapi import APIRouter, HTTPException
-from recommender.AnimeDataLoader import enrich_hybrid_recommendations
+from recommender.AnimeDataLoader import enrich_hybrid_recommendations, get_anime_details
 
 from recommender.hybrid_recommender import (
+    calculate_compatibility_score,
     get_hybrid_recommendations_from_favorites,
     get_hybrid_recommendations_with_text_from_favorites
 )
 
 from models.models import (
+    CompatibilityBatchRequest,
+    CompatibilityBatchResponse,
+    CompatibilityRequest,
+    CompatibilityResponse,
     DetailedRecommendedAnime,
     HybridRecommendationRequest,
     HybridTextRecommendationRequest
@@ -70,3 +75,36 @@ def hybrid_recommend_with_text(request: HybridTextRecommendationRequest):
         raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error getting hybrid recommendations: {str(e)}")
+    
+
+@router.post("/compatibility/score", response_model=CompatibilityResponse, tags=["Compatibility"])
+def get_compatibility(request: CompatibilityRequest):
+    """Calculate compatibility score (1-100) for a target anime"""
+    try:
+        score = calculate_compatibility_score(request.target_anime_id, request.user_favourite_ids)
+        return CompatibilityResponse(
+            target_anime_id=request.target_anime_id,
+            compatibility_score=score
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error calculating compatibility: {str(e)}")
+
+
+@router.post("/compatibility/score/detailed", tags=["Compatibility"])
+def get_compatibility_detailed(request: CompatibilityRequest):
+    """Get compatibility score with full anime details"""
+    try:
+        score = calculate_compatibility_score(request.target_anime_id, request.user_favourite_ids)
+        anime = get_anime_details(request.target_anime_id)
+        if not anime:
+            raise HTTPException(status_code=404, detail="Anime not found")
+
+        return {
+            "anime": anime,
+            "compatibility_score": score,
+            "scale": "1-100"
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error calculating compatibility: {str(e)}")
