@@ -4,13 +4,13 @@ from recommender.AnimeDataLoader import enrich_hybrid_recommendations, get_anime
 
 from recommender.hybrid_recommender import (
     calculate_compatibility_score,
+    get_most_compatible_from_favourites,
     get_hybrid_recommendations_from_favorites,
     get_hybrid_recommendations_with_text_from_favorites
 )
 
 from models.models import (
-    CompatibilityBatchRequest,
-    CompatibilityBatchResponse,
+    CollaborativeRecommendationRequest,
     CompatibilityRequest,
     CompatibilityResponse,
     DetailedRecommendedAnime,
@@ -108,3 +108,43 @@ def get_compatibility_detailed(request: CompatibilityRequest):
         raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error calculating compatibility: {str(e)}")
+    
+@router.post("/compatible", tags=["Compatibility"])
+def get_most_compatible(request: CollaborativeRecommendationRequest):
+    """Get compatibility scores for multiple anime based on user favourites"""
+    try:
+        compatibility_result = get_most_compatible_from_favourites(request.user_favourite_ids, request.limit)
+        anime_results = [{"anime_id": aid, "compatibility_score": score} for aid, score in compatibility_result]
+        anime_results.sort(key=lambda x: x["compatibility_score"], reverse=True)
+
+        return {
+            "data": anime_results,
+            "scale": "1-100"
+        }
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error calculating batch compatibility: {str(e)}")
+    
+@router.post("/compatibile/detailed", tags=["Compatibility"])
+def get_compatible_detailed(request: CollaborativeRecommendationRequest):
+    """Get compatibility scores with full anime details for multiple anime"""
+    try:
+        compatibility_result = get_most_compatible_from_favourites(request.user_favourite_ids, request.limit)
+        detailed_results = []
+        for aid, score in compatibility_result:
+            anime = get_anime_details(aid)
+            if anime:
+                detailed_results.append({
+                    "anime": anime,
+                    "compatibility_score": score
+                })
+
+        detailed_results.sort(key=lambda x: x["compatibility_score"], reverse=True)
+
+        return {
+            "data": detailed_results,
+            "scale": "1-100"
+        }
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error calculating batch compatibility: {str(e)}")

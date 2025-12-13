@@ -50,10 +50,6 @@ class CompatibilityRequest(BaseModel):
     target_anime_id: int
     user_favourite_ids: List[int]
 
-class CompatibilityBatchRequest(BaseModel):
-    target_anime_ids: List[int]
-    user_favourite_ids: List[int]
-
 class HybridRecommendationRequest(BaseModel):
     user_anime_list: List[int] = []
     limit: int = Field(default=10, ge=1, le=100)
@@ -72,11 +68,6 @@ class CompatibilityResponse(BaseModel):
     """Response for compatibility scoring"""
     target_anime_id: int
     compatibility_score: float = Field(..., ge=1, le=100)
-    scale: str = "1-100"
-
-class CompatibilityBatchResponse(BaseModel):
-    """Response for batch compatibility scoring"""
-    scores: Dict[int, float]
     scale: str = "1-100"
 
 class PredictionResponse(BaseModel):
