@@ -1,6 +1,6 @@
 from typing import List
 from functools import lru_cache
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, HTTPException, Query, Body
 from models.models import  RecommendedAnime
 from recommender.AnimeDataLoader import enrich_scored_recommendations
 
@@ -15,7 +15,7 @@ router = APIRouter(prefix="/v1", tags=["Recommender content based"])
 
 @lru_cache(maxsize=1024)
 @router.get("/recommend", response_model=List[int])
-def recommend(anime_id: int, limit: int = Query(default=10, ge=1, le=100)):
+def recommend(anime_id: int, limit: int = Body(default=10, ge=1, le=100)):
     """Get similar anime IDs based on content embeddings (fast, lightweight)"""
     results = get_recommendations(anime_id, limit)
     if not results:
@@ -37,16 +37,16 @@ def recommend_detailed(anime_id: int, limit: int = Query(default=10, ge=1, le=10
 
     return enriched
 
-@router.get("/recommend_batch", response_model=List[int])
-def recommend_batch(anime_ids: List[int] = Query(...), limit: int = Query(default=10, ge=1, le=100)):
+@router.post("/recommend_batch", response_model=List[int])
+def recommend_batch(anime_ids: List[int], limit: int = Body(default=10, ge=1, le=100)):
     """Get recommendations based on a list of anime (averaged profile)"""
     result = get_recommendations_by_list(anime_ids, limit)
     if not result:
         raise HTTPException(status_code=404, detail="No recommendation could be made.")
     return result
 
-@router.get("/recommend_batch/detailed", response_model=List[RecommendedAnime])
-def recommend_batch_detailed(anime_ids: List[int] = Query(...), limit: int = Query(default=10, ge=1, le=100)):
+@router.post("/recommend_batch/detailed", response_model=List[RecommendedAnime])
+def recommend_batch_detailed(anime_ids: List[int], limit: int = Body(default=10, ge=1, le=100)):
     """Get batch recommendations with full anime details"""
     result = get_recommendations_by_list(anime_ids, limit)
     if not result:

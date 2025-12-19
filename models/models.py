@@ -44,7 +44,7 @@ class DetailedRecommendationResponse(BaseModel):
 
 class CollaborativeRecommendationRequest(BaseModel):
     user_favourite_ids: List[int] = []
-    limit: int = Field(default=10, ge=1, le=100)
+    limit: int = Field(default=10, ge=1)
 
 class CompatibilityRequest(BaseModel):
     target_anime_id: int
