@@ -1,6 +1,5 @@
 import numpy as np
 import json
-from functools import lru_cache
 from typing import List, Dict, Tuple, Optional
 from sklearn.metrics.pairwise import cosine_similarity
 from sentence_transformers import SentenceTransformer
