@@ -108,7 +108,7 @@ def get_compatibility_detailed(request: CompatibilityRequest):
         raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error calculating compatibility: {str(e)}")
-    
+
 @router.post("/compatible", tags=["Compatibility"])
 def get_most_compatible(request: CollaborativeRecommendationRequest):
     """Get compatibility scores for multiple anime based on user favourites"""

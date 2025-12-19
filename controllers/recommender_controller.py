@@ -1,4 +1,5 @@
 from typing import List
+from functools import lru_cache
 from fastapi import APIRouter, HTTPException, Query
 from models.models import  RecommendedAnime
 from recommender.AnimeDataLoader import enrich_scored_recommendations
@@ -12,6 +13,7 @@ from recommender.recommender import (
 
 router = APIRouter(prefix="/v1", tags=["Recommender content based"])
 
+@lru_cache(maxsize=1024)
 @router.get("/recommend", response_model=List[int])
 def recommend(anime_id: int, limit: int = Query(default=10, ge=1, le=100)):
     """Get similar anime IDs based on content embeddings (fast, lightweight)"""
