@@ -1,6 +1,7 @@
 .env
 .venv
 .idea
+.vscode
 data/json/*
 data/embeddings/*
 .ropeproject
