@@ -20,7 +20,7 @@ from models.models import (
 
 router = APIRouter(prefix="/v1", tags=["Hybrid recommender"])
 
-@router.post("/v1/hybrid/recommend", response_model=List[DetailedRecommendedAnime])
+@router.post("/hybrid/recommend", response_model=List[DetailedRecommendedAnime])
 def hybrid_recommend(request: HybridRecommendationRequest):
     """
     Get hybrid recommendations (CF + Content) with full anime details and score breakdown.
@@ -47,7 +47,7 @@ def hybrid_recommend(request: HybridRecommendationRequest):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error getting hybrid recommendations: {str(e)}")
 
-@router.post("/v1/hybrid/recommend/text", response_model=List[DetailedRecommendedAnime])
+@router.post("/hybrid/recommend/text", response_model=List[DetailedRecommendedAnime])
 def hybrid_recommend_with_text(request: HybridTextRecommendationRequest):
     """
     Get hybrid recommendations (CF + Content + NLP) with full details.
