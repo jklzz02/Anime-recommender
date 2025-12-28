@@ -29,8 +29,7 @@ def recommend_detailed(anime_id: int, limit: int = Query(default=10, ge=1, le=10
     if not results:
         raise HTTPException(status_code=404, detail="Anime not found or no similar entries.")
 
-    scored_results = [(aid, 1.0 - (i * 0.05)) for i, aid in enumerate(results)]
-    enriched = enrich_scored_recommendations(scored_results)
+    enriched = enrich_scored_recommendations(results)
 
     if not enriched:
         raise HTTPException(status_code=500, detail="Failed to enrich recommendations with details.")

@@ -17,7 +17,7 @@ with open("data/json/index_to_id.json", "r") as f:
 
 model = SentenceTransformer("intfloat/e5-base")
 
-def get_recommendations(anime_id: int, limit: int = 10) -> List[int]:
+def get_recommendations(anime_id: int, limit: int = 10) -> List[Tuple[int, float]]:
     """Get similar anime based on content embeddings"""
     idx = id_to_index.get(str(anime_id))
 
@@ -26,9 +26,9 @@ def get_recommendations(anime_id: int, limit: int = 10) -> List[int]:
 
     query_vector = content_embeddings[int(idx)].reshape(1, -1)
     similarities = cosine_similarity(query_vector, content_embeddings).flatten()
-
     similar_indices = similarities.argsort()[::-1][1:limit + 1]
-    return [int(index_to_id[i]) for i in similar_indices]
+
+    return [(int(index_to_id[i]), float(similarities[i])) for i in similar_indices]
 
 def get_recommendations_by_list(anime_ids: List[int], limit: int = 10) -> List[Tuple[int, float]]:
     """Get recommendations based on a list of anime"""
