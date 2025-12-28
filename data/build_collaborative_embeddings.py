@@ -18,17 +18,7 @@ anime_cf_embeddings_path = os.path.join(embeddings_dir_path, "anime_cf_embedding
 user_mapping_path = os.path.join(json_dir_path, "user_mappings.json")
 rating_stats_path = os.path.join(json_dir_path, "rating_stats.json")
 
-
 def build_collaborative_embeddings(n_factors=100, min_ratings_per_user=5, min_ratings_per_anime=5):
-    """
-    Build collaborative filtering embeddings using Matrix Factorization (SVD).
-    
-    Args:
-        n_factors: Number of latent factors for embeddings
-        min_ratings_per_user: Minimum ratings required for a user to be included
-        min_ratings_per_anime: Minimum ratings required for an anime to be included
-    """
-    
     if not os.path.exists(embeddings_dir_path):
         os.makedirs(embeddings_dir_path)
 
@@ -159,23 +149,15 @@ def build_collaborative_embeddings(n_factors=100, min_ratings_per_user=5, min_ra
     
     logger.info("Collaborative filtering embeddings created successfully!")
     print(f"\nSummary:")
-    print(f"  - Users: {n_users}")
-    print(f"  - Anime: {n_anime}")
-    print(f"  - Ratings: {len(filtered_df)}")
-    print(f"  - Embedding dimensions: {n_factors}")
-    print(f"  - Global mean rating: {global_mean:.2f}")
-    print(f"  - User embeddings shape: {user_embeddings.shape}")
-    print(f"  - Anime CF embeddings shape: {anime_embeddings.shape}")
+    print(f"\t- Users: {n_users}")
+    print(f"\t- Anime: {n_anime}")
+    print(f"\t- Ratings: {len(filtered_df)}")
+    print(f"\t- Embedding dimensions: {n_factors}")
+    print(f"\t- Global mean rating: {global_mean:.2f}")
+    print(f"\t- User embeddings shape: {user_embeddings.shape}")
+    print(f"\t- Anime CF embeddings shape: {anime_embeddings.shape}")
 
 def main():
-    """
-    Main function to build collaborative filtering embeddings.
-    
-    Adjust parameters as needed:
-    - n_factors: Higher = more detailed user preferences (50-200 typical)
-    - min_ratings_per_user: Filter out users with too few ratings
-    - min_ratings_per_anime: Filter out anime with too few ratings
-    """
     build_collaborative_embeddings(
         n_factors=100,
         min_ratings_per_user=5,

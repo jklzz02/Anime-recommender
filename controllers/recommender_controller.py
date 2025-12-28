@@ -20,12 +20,13 @@ def recommend(anime_id: int, limit: int = Body(default=10, ge=1, le=100)):
     results = get_recommendations(anime_id, limit)
     if not results:
         raise HTTPException(status_code=404, detail="Anime not found or no similar entries.")
-    return results
+    return [ aid for aid, _ in results]
 
 @router.get("/recommend/detailed", response_model=List[RecommendedAnime])
 def recommend_detailed(anime_id: int, limit: int = Query(default=10, ge=1, le=100)):
     """Get similar anime with full details and similarity scores"""
     results = get_recommendations(anime_id, limit)
+    
     if not results:
         raise HTTPException(status_code=404, detail="Anime not found or no similar entries.")
 
@@ -40,9 +41,11 @@ def recommend_detailed(anime_id: int, limit: int = Query(default=10, ge=1, le=10
 def recommend_batch(anime_ids: List[int], limit: int = Body(default=10, ge=1, le=100)):
     """Get recommendations based on a list of anime (averaged profile)"""
     result = get_recommendations_by_list(anime_ids, limit)
+    
     if not result:
         raise HTTPException(status_code=404, detail="No recommendation could be made.")
-    return result
+    
+    return [ aid for aid, _ in result ]
 
 @router.post("/recommend_batch/detailed", response_model=List[RecommendedAnime])
 def recommend_batch_detailed(anime_ids: List[int], limit: int = Body(default=10, ge=1, le=100)):
@@ -67,6 +70,7 @@ def recommend_from_text(
     try:
         results = get_recommendations_from_text(query, limit)
         return results
+    
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error processing text query: {str(e)}")
 

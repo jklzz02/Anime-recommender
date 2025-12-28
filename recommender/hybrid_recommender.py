@@ -26,7 +26,7 @@ with open("data/json/rating_stats.json", "r") as f:
     rating_stats = json.load(f)
     global_mean = rating_stats["global_mean"]
 
-model = SentenceTransformer("sentence-transformers/all-mpnet-base-v2")
+model = SentenceTransformer("intfloat/e5-base")
 
 def _validate_and_get_indices(user_anime_ids: List[int]) -> Tuple[List[int], List[int]]:
     cf_user_ids = [aid for aid in user_anime_ids if aid in anime_to_cf_idx]
@@ -102,6 +102,7 @@ def calculate_compatibility_score(target_anime_id: int,
                                    user_ratings: Optional[Dict[int, float]] = None,
                                    score_floor: float = 50.0,
                                    cf_boost: float = 1.2) -> float:
+
     target_content_idx = id_to_index.get(str(target_anime_id))
     target_cf_idx = anime_to_cf_idx.get(target_anime_id)
     
@@ -146,6 +147,7 @@ def get_most_compatible_from_favourites(user_anime_ids: List[int],
                                         cf_boost: float = 1.2,
                                         min_score: float = 60.0,
                                         exclude_ids: Optional[List[int]] = None) -> List[Tuple[int, float]]:
+
     if not user_anime_ids:
         return []
     
@@ -177,6 +179,7 @@ def get_most_compatible_from_favourites(user_anime_ids: List[int],
 def get_cf_recommendations_from_favorites(user_anime_ids: List[int], 
                                           limit: int = 10,
                                           user_ratings: Optional[Dict[int, float]] = None) -> List[Tuple[int, float]]:
+
     cf_user_ids, _ = _validate_and_get_indices(user_anime_ids)
     if not cf_user_ids:
         return []
@@ -197,6 +200,7 @@ def get_cf_recommendations_from_favorites(user_anime_ids: List[int],
     return recommendations
 
 def get_cf_similar_anime(anime_id: int, limit: int = 10) -> List[Tuple[int, float]]:
+
     cf_idx = anime_to_cf_idx.get(anime_id)
     if cf_idx is None:
         return []
@@ -212,6 +216,7 @@ def get_hybrid_recommendations_from_favorites(user_anime_ids: List[int],
                                               user_ratings: Optional[Dict[int, float]] = None,
                                               cf_weight: float = 0.5,
                                               content_weight: float = 0.5) -> List[Tuple[int, float, Dict]]:
+    
     total_weight = cf_weight + content_weight
     cf_weight /= total_weight
     content_weight /= total_weight
@@ -258,6 +263,7 @@ def get_hybrid_recommendations_with_text_from_favorites(user_anime_ids: List[int
                                                         cf_weight: float = 0.33,
                                                         content_weight: float = 0.33,
                                                         nlp_weight: float = 0.34) -> List[Tuple[int, float, Dict]]:
+    
     total_weight = cf_weight + content_weight + nlp_weight
     cf_weight /= total_weight
     content_weight /= total_weight
