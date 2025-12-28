@@ -52,8 +52,7 @@ def recommend_batch_detailed(anime_ids: List[int], limit: int = Body(default=10,
     if not result:
         raise HTTPException(status_code=404, detail="No recommendation could be made.")
 
-    scored_results = [(aid, 1.0 - (i * 0.05)) for i, aid in enumerate(result)]
-    enriched = enrich_scored_recommendations(scored_results)
+    enriched = enrich_scored_recommendations(result)
 
     if not enriched:
         raise HTTPException(status_code=500, detail="Failed to enrich recommendations with details.")

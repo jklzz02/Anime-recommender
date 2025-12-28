@@ -30,7 +30,7 @@ def get_recommendations(anime_id: int, limit: int = 10) -> List[int]:
     similar_indices = similarities.argsort()[::-1][1:limit + 1]
     return [int(index_to_id[i]) for i in similar_indices]
 
-def get_recommendations_by_list(anime_ids: List[int], limit: int = 10) -> List[int]:
+def get_recommendations_by_list(anime_ids: List[int], limit: int = 10) -> List[Tuple[int, float]]:
     """Get recommendations based on a list of anime"""
     valid_indices = [id_to_index[str(i)] for i in anime_ids if str(i) in id_to_index]
 
@@ -51,7 +51,9 @@ def get_recommendations_by_list(anime_ids: List[int], limit: int = 10) -> List[i
         if len(recommended_ids) >= limit:
             break
 
-    return recommended_ids
+    similarities = cosine_similarity(query_vector, content_embeddings).flatten()
+    similar_indices = similarities.argsort()[::-1][1:limit + 1]
+    return [(int(index_to_id[i]), float(similarities[i])) for i in similar_indices]
 
 def get_recommendations_from_text(query: str, limit: int = 10) -> List[int]:
     """
