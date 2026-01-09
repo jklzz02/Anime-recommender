@@ -67,7 +67,7 @@ class HybridTextRecommendationRequest(BaseModel):
 class CompatibilityResponse(BaseModel):
     """Response for compatibility scoring"""
     target_anime_id: int
-    compatibility_score: float = Field(..., ge=1, le=100)
+    compatibility_score: float = Field(..., ge=0, le=100)
     scale: str = "1-100"
 
 class PredictionResponse(BaseModel):
