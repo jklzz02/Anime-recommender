@@ -55,7 +55,7 @@ def get_recommendations_by_list(anime_ids: List[int], limit: int = 10) -> List[T
 
 
 def get_recommendations_from_text(query: str, limit: int = 10) -> List[int]:
-    query_embedding = model.encode(["query: " + query])[0].reshape(1, -1)
+    query_embedding = model.encode(["query: " + query], show_progress_bar=False)[0].reshape(1, -1)
     similarities = cosine_similarity(query_embedding, nlp_embeddings).flatten()
     similar_indices = similarities.argsort()[::-1][:limit]
     
@@ -63,7 +63,7 @@ def get_recommendations_from_text(query: str, limit: int = 10) -> List[int]:
 
 
 def get_recommendations_from_text_with_scores(query: str, limit: int = 10) -> List[Tuple[int, float]]:
-    query_embedding = model.encode(["query: " + query])[0].reshape(1, -1)
+    query_embedding = model.encode(["query: " + query], show_progress_bar=False)[0].reshape(1, -1)
     similarities = cosine_similarity(query_embedding, nlp_embeddings).flatten()
     similar_indices = similarities.argsort()[::-1][:limit]
     
@@ -71,7 +71,7 @@ def get_recommendations_from_text_with_scores(query: str, limit: int = 10) -> Li
 
 
 def get_recommendations_semantic_search(query: str, limit: int = 10) -> List[Tuple[int, float]]:
-    query_embedding = model.encode(["query: " + query])[0].reshape(1, -1)
+    query_embedding = model.encode(["query: " + query], show_progress_bar=False)[0].reshape(1, -1)
     similarities = cosine_similarity(query_embedding, content_embeddings).flatten()
     similar_indices = similarities.argsort()[::-1][:limit]
     

@@ -1,14 +1,14 @@
 from typing import List
 from functools import lru_cache
 from fastapi import APIRouter, HTTPException, Query, Body
-from models.models import  RecommendedAnime
+from models.models import  RecommendationResponse, RecommendedAnime
 from recommender.AnimeDataLoader import enrich_scored_recommendations
 
 from recommender.recommender import (
     get_recommendations,
     get_recommendations_by_list,
-    get_recommendations_from_text,
     get_recommendations_from_text_with_scores,
+    get_recommendations_semantic_search,
 )
 
 router = APIRouter(prefix="/v1", tags=["Recommender content based"])
@@ -61,15 +61,53 @@ def recommend_batch_detailed(anime_ids: List[int], limit: int = Body(default=10,
 
     return enriched
 
-@router.get("/recommend/text", response_model=List[int], tags=["NLP Search"])
-def recommend_from_text(
+@router.get("/recommend/semantic/text", response_model=List[RecommendationResponse], tags=["NLP Search"])
+def recommend_from_text_semantic(
         query: str = Query(..., description="Natural language query like 'action anime with magic'"),
-        limit: int = Query(default=10, ge=1, le=100)
+        limit: int = Query(default=10, ge=1, le=100),
+        min_similarity: float = Query(default=None, ge=1, le=1.1)
 ):
     """Get anime recommendations from natural language text query (IDs only)"""
     try:
-        results = get_recommendations_from_text(query, limit)
-        return results
+        results = get_recommendations_semantic_search(query, limit)
+
+        if not min_similarity:
+            return [ {"anime_id": aid, "score": score} for aid, score in results ]
+        else:
+            return [ {"anime_id": aid, "score": score} for aid, score in results if score >= min_similarity ]
+    
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error processing text query: {str(e)}")
+    
+
+@router.get("/recommend/semantic/text/detailed", response_model=List[RecommendedAnime], tags=["NLP Search"])
+def recommend_from_text_semantic_detailed(
+        query: str = Query(..., description="Natural language query like 'action anime with magic'"),
+        limit: int = Query(default=10, ge=1, le=100),
+        min_similarity: float = Query(default=None, ge=1, le=1.1)
+):
+    """Get anime recommendations from natural language text query (IDs only)"""
+    try:
+        results = get_recommendations_semantic_search(query, limit)
+        enriched = enrich_scored_recommendations(results)
+
+        if not min_similarity:
+            return enriched
+        else:
+            return [ result for result in enriched if result["score"] >= min_similarity ]
+    
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error processing text query: {str(e)}")
+    
+@router.get("/recommend/text", response_model=List[RecommendationResponse], tags=["NLP Search"])
+def recommend_from_text(
+        query: str = Query(..., description="Natural language query"),
+        limit: int = Query(default=10, ge=1, le=100)
+):
+    """Get anime recommendations with full details and similarity scores"""
+    try:
+        results = get_recommendations_from_text_with_scores(query, limit)
+        return [ {"anime_id": aid, "score": score} for aid, score in results]
     
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error processing text query: {str(e)}")

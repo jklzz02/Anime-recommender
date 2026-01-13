@@ -288,7 +288,7 @@ def get_hybrid_recommendations_with_text_from_favorites(user_anime_ids: List[int
             if anime_id not in user_anime_ids:
                 content_scores[anime_id] = float(sim)
 
-    query_embedding = model.encode(["query: " + text_query])[0].reshape(1, -1)
+    query_embedding = model.encode(["query: " + text_query], show_progress_bar=False)[0].reshape(1, -1)
     nlp_similarities = cosine_similarity(query_embedding, nlp_embeddings).flatten()
     nlp_scores = {int(index_to_id[i]): float(nlp_similarities[i]) for i in range(len(nlp_similarities))}
 
