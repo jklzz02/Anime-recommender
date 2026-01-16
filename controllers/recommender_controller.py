@@ -61,7 +61,7 @@ def recommend_batch_detailed(anime_ids: List[int], limit: int = Body(default=10,
 
     return enriched
 
-@router.get("/recommend/semantic/text", response_model=List[RecommendationResponse], tags=["NLP Search"])
+@router.get("/recommend/semantic/search", response_model=List[RecommendationResponse], tags=["NLP Search"])
 def recommend_from_text_semantic(
         query: str = Query(..., description="Natural language query like 'action anime with magic'"),
         limit: int = Query(default=10, ge=1, le=100),
@@ -80,7 +80,7 @@ def recommend_from_text_semantic(
         raise HTTPException(status_code=500, detail=f"Error processing text query: {str(e)}")
     
 
-@router.get("/recommend/semantic/text/detailed", response_model=List[RecommendedAnime], tags=["NLP Search"])
+@router.get("/recommend/semantic/search/detailed", response_model=List[RecommendedAnime], tags=["NLP Search"])
 def recommend_from_text_semantic_detailed(
         query: str = Query(..., description="Natural language query like 'action anime with magic'"),
         limit: int = Query(default=10, ge=1, le=100),

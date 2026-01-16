@@ -26,9 +26,13 @@ with open("data/json/rating_stats.json", "r") as f:
     rating_stats = json.load(f)
     global_mean = rating_stats["global_mean"]
 
-model = SentenceTransformer("intfloat/e5-base")
+model = SentenceTransformer("BAAI/bge-base-en-v1.5")
+
+QUERY_PREFIX = "Represent this sentence for searching relevant passages: "
+
 
 def _validate_and_get_indices(user_anime_ids: List[int]) -> Tuple[List[int], List[int]]:
+    """Validate anime IDs and get their indices in both CF and content spaces"""
     cf_user_ids = [aid for aid in user_anime_ids if aid in anime_to_cf_idx]
     content_user_indices = [
         id_to_index[str(aid)] for aid in user_anime_ids 
@@ -36,10 +40,15 @@ def _validate_and_get_indices(user_anime_ids: List[int]) -> Tuple[List[int], Lis
     ]
     return cf_user_ids, content_user_indices
 
+
 def _compute_weighted_average(vectors: np.ndarray, 
                                anime_ids: List[int], 
                                user_ratings: Optional[Dict[int, float]],
                                id_getter=None) -> np.ndarray:
+    """
+    Compute weighted average of vectors based on user ratings
+    Higher ratings get exponentially more weight
+    """
     if user_ratings:
         weights = np.array([
             max(0, user_ratings.get(id_getter(aid) if id_getter else aid, 7.0) - 5.0) / 5.0
@@ -53,11 +62,15 @@ def _compute_weighted_average(vectors: np.ndarray,
     
     return np.mean(vectors, axis=0).reshape(1, -1)
 
+
 def _compute_similarity_with_weights(target_vec: np.ndarray,
                                      user_vecs: np.ndarray,
                                      anime_ids: List[int],
                                      user_ratings: Optional[Dict[int, float]],
                                      id_getter=None) -> float:
+    """
+    Compute similarity between target and user vectors with rating-based weighting
+    """
     sims = cosine_similarity(target_vec, user_vecs).flatten()
     
     if user_ratings:
@@ -72,9 +85,13 @@ def _compute_similarity_with_weights(target_vec: np.ndarray,
     
     return np.max(sims) * 0.7 + np.mean(sims) * 0.3
 
+
 def _compute_final_similarity(cf_similarity: Optional[float],
                                content_similarity: Optional[float],
                                cf_boost: float = 1.2) -> Optional[float]:
+    """
+    Combine CF and content similarities with optional CF boost
+    """
     if cf_similarity is not None and content_similarity is not None:
         cf_weight = 0.65 * cf_boost
         content_weight = 0.35
@@ -88,7 +105,11 @@ def _compute_final_similarity(cf_similarity: Optional[float],
         return content_similarity
     return None
 
+
 def _similarity_to_score(similarity: float, score_floor: float = 50.0) -> float:
+    """
+    Convert cosine similarity to 1-100 compatibility score
+    """
     if similarity >= 0.7:
         score = 80 + (similarity - 0.7) / 0.3 * 20
     elif similarity >= 0.5:
@@ -97,12 +118,18 @@ def _similarity_to_score(similarity: float, score_floor: float = 50.0) -> float:
         score = 1 + (similarity / 0.5) * (score_floor - 1)
     return np.clip(score, 1, 100)
 
+
 def calculate_compatibility_score(target_anime_id: int, 
                                    user_anime_ids: List[int],
                                    user_ratings: Optional[Dict[int, float]] = None,
                                    score_floor: float = 50.0,
                                    cf_boost: float = 1.2) -> float:
-
+    """
+    Calculate compatibility score between target anime and user's profile
+    Combines collaborative filtering and content-based similarity
+    
+    Returns: Score from 0-100
+    """
     target_content_idx = id_to_index.get(str(target_anime_id))
     target_cf_idx = anime_to_cf_idx.get(target_anime_id)
     
@@ -140,6 +167,7 @@ def calculate_compatibility_score(target_anime_id: int,
     score = _similarity_to_score(final_similarity, score_floor)
     return float(round(score, 2))
 
+
 def get_most_compatible_from_favourites(user_anime_ids: List[int],
                                         limit: int = 10,
                                         user_ratings: Optional[Dict[int, float]] = None,
@@ -147,7 +175,21 @@ def get_most_compatible_from_favourites(user_anime_ids: List[int],
                                         cf_boost: float = 1.2,
                                         min_score: float = 60.0,
                                         exclude_ids: Optional[List[int]] = None) -> List[Tuple[int, float]]:
-
+    """
+    Find most compatible anime based on user's favorites
+    
+    Args:
+        user_anime_ids: List of anime IDs in user's list
+        limit: Maximum number of recommendations
+        user_ratings: Optional dict mapping anime_id -> rating
+        score_floor: Minimum score for medium similarity matches
+        cf_boost: Boost factor for CF component
+        min_score: Minimum compatibility score to include
+        exclude_ids: Additional anime IDs to exclude
+    
+    Returns:
+        List of (anime_id, compatibility_score) tuples
+    """
     if not user_anime_ids:
         return []
     
@@ -176,10 +218,13 @@ def get_most_compatible_from_favourites(user_anime_ids: List[int],
     scored_anime.sort(key=lambda x: x[1], reverse=True)
     return scored_anime[:limit]
 
+
 def get_cf_recommendations_from_favorites(user_anime_ids: List[int], 
                                           limit: int = 10,
                                           user_ratings: Optional[Dict[int, float]] = None) -> List[Tuple[int, float]]:
-
+    """
+    Pure collaborative filtering recommendations based on user's favorites
+    """
     cf_user_ids, _ = _validate_and_get_indices(user_anime_ids)
     if not cf_user_ids:
         return []
@@ -199,8 +244,12 @@ def get_cf_recommendations_from_favorites(user_anime_ids: List[int],
 
     return recommendations
 
-def get_cf_similar_anime(anime_id: int, limit: int = 10) -> List[Tuple[int, float]]:
 
+def get_cf_similar_anime(anime_id: int, limit: int = 10) -> List[Tuple[int, float]]:
+    """
+    Find similar anime using collaborative filtering
+    Based on users who liked the same anime
+    """
     cf_idx = anime_to_cf_idx.get(anime_id)
     if cf_idx is None:
         return []
@@ -211,12 +260,18 @@ def get_cf_similar_anime(anime_id: int, limit: int = 10) -> List[Tuple[int, floa
     sorted_indices = similarities.argsort()[::-1][1:limit + 1]
     return [(cf_idx_to_anime[idx], float(similarities[idx])) for idx in sorted_indices]
 
+
 def get_hybrid_recommendations_from_favorites(user_anime_ids: List[int],
                                               limit: int = 10,
                                               user_ratings: Optional[Dict[int, float]] = None,
                                               cf_weight: float = 0.5,
                                               content_weight: float = 0.5) -> List[Tuple[int, float, Dict]]:
+    """
+    Hybrid recommendations combining CF and content-based approaches
     
+    Returns:
+        List of (anime_id, combined_score, score_breakdown) tuples
+    """
     total_weight = cf_weight + content_weight
     cf_weight /= total_weight
     content_weight /= total_weight
@@ -256,6 +311,7 @@ def get_hybrid_recommendations_from_favorites(user_anime_ids: List[int],
     hybrid_results.sort(key=lambda x: x[1], reverse=True)
     return hybrid_results[:limit]
 
+
 def get_hybrid_recommendations_with_text_from_favorites(user_anime_ids: List[int],
                                                         text_query: str,
                                                         limit: int = 10,
@@ -263,7 +319,22 @@ def get_hybrid_recommendations_with_text_from_favorites(user_anime_ids: List[int
                                                         cf_weight: float = 0.33,
                                                         content_weight: float = 0.33,
                                                         nlp_weight: float = 0.34) -> List[Tuple[int, float, Dict]]:
+    """
+    Hybrid recommendations with user text query
+    Combines CF, content similarity, and natural language search
     
+    Args:
+        user_anime_ids: User's favorite anime IDs
+        text_query: Natural language query (e.g., "dark psychological thriller")
+        limit: Number of recommendations
+        user_ratings: Optional rating information
+        cf_weight: Weight for collaborative filtering
+        content_weight: Weight for content similarity
+        nlp_weight: Weight for NLP text matching
+    
+    Returns:
+        List of (anime_id, combined_score, score_breakdown) tuples
+    """
     total_weight = cf_weight + content_weight + nlp_weight
     cf_weight /= total_weight
     content_weight /= total_weight
@@ -288,7 +359,13 @@ def get_hybrid_recommendations_with_text_from_favorites(user_anime_ids: List[int
             if anime_id not in user_anime_ids:
                 content_scores[anime_id] = float(sim)
 
-    query_embedding = model.encode(["query: " + text_query], show_progress_bar=False)[0].reshape(1, -1)
+    query_with_prefix = QUERY_PREFIX + text_query
+    query_embedding = model.encode(
+        [query_with_prefix], 
+        show_progress_bar=False,
+        normalize_embeddings=True
+    )[0].reshape(1, -1)
+    
     nlp_similarities = cosine_similarity(query_embedding, nlp_embeddings).flatten()
     nlp_scores = {int(index_to_id[i]): float(nlp_similarities[i]) for i in range(len(nlp_similarities))}
 
@@ -310,9 +387,17 @@ def get_hybrid_recommendations_with_text_from_favorites(user_anime_ids: List[int
     hybrid_results.sort(key=lambda x: x[1], reverse=True)
     return hybrid_results[:limit]
 
+
 def predict_rating_from_favorites(user_anime_ids: List[int], 
                                    anime_id: int,
                                    user_ratings: Optional[Dict[int, float]] = None) -> Optional[float]:
+    """
+    Predict user's rating for an anime based on their favorites
+    Uses collaborative filtering similarity
+    
+    Returns:
+        Predicted rating (1-10) or None if prediction not possible
+    """
     cf_user_ids, _ = _validate_and_get_indices(user_anime_ids)
     if not cf_user_ids or anime_id not in anime_to_cf_idx:
         return None
@@ -326,9 +411,16 @@ def predict_rating_from_favorites(user_anime_ids: List[int],
     predicted_rating = np.clip(predicted_rating, 1, 10)
     return float(predicted_rating)
 
+
 def get_similar_users_from_favorites(user_anime_ids: List[int], 
                                       limit: int = 10,
                                       user_ratings: Optional[Dict[int, float]] = None) -> List[Tuple[int, float]]:
+    """
+    Find users with similar taste based on favorites
+    
+    Returns:
+        List of (user_index, similarity_score) tuples
+    """
     cf_user_ids, _ = _validate_and_get_indices(user_anime_ids)
     if not cf_user_ids:
         return []
