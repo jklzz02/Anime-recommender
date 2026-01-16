@@ -15,7 +15,7 @@ data_path = os.path.join(data_dir_path, "anime-dataset.csv")
 embeddings_path = os.path.join(embeddings_dir_path, "anime_embeddings.npy")
 
 MODEL_NAME = "BAAI/bge-base-en-v1.5"
-QUERY_PREFIX = "Represent this sentence for searching relevant passages: "
+DOC_PREFIX = "Represent this passage for retrieval: "
 
 
 def clean_text(text):
@@ -23,23 +23,24 @@ def clean_text(text):
         return ''
     return str(text).strip()
 
-
 def create_document(row):
-    synopsis = clean_text(row['Synopsis'])
-    genres = clean_text(row['Genres'])
-    name = clean_text(row['Name'])
-    
-    if synopsis:
-        doc = synopsis
-        if genres:
-            doc += f" {genres}"
-        return doc
-    
-    if name:
-        return f"{name} {genres}" if genres else name
-    
-    return genres if genres else "Unknown"
+    name = clean_text(row["Name"])
+    synopsis = clean_text(row["Synopsis"])
+    genres = clean_text(row["Genres"])
+    studio = clean_text(row["Studio"])
+    source = clean_text(row["Source"])
+    rating = clean_text(row["Rating"])
 
+    parts = [
+        f"Title: {name}",
+        f"Genres: {genres}",
+        f"Studio: {studio}",
+        f"Source: {source}",
+        f"Rating: {rating}",
+        f"Synopsis: {synopsis}",
+    ]
+
+    return " ".join(p for p in parts if p.strip())
 
 def main():
     os.makedirs(embeddings_dir_path, exist_ok=True)
@@ -59,7 +60,10 @@ def main():
     model = SentenceTransformer(MODEL_NAME)
     print(f"Model: {MODEL_NAME}")
     
-    documents = anime_df.apply(create_document, axis=1).tolist()
+    documents = [
+        DOC_PREFIX + create_document(row)
+        for _, row in anime_df.iterrows()
+    ]
     
     print(f"Encoding {len(documents):,} documents...")
     embeddings = model.encode(
@@ -85,11 +89,9 @@ def main():
             "model": MODEL_NAME,
             "dimensions": model.get_sentence_embedding_dimension(),
             "total": len(anime_df),
-            "query_prefix": QUERY_PREFIX
         }, f, indent=2)
 
     print("Done")
-
 
 if __name__ == "__main__":
     main()

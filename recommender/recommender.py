@@ -13,13 +13,18 @@ with open("data/json/id_to_index.json", "r") as f:
 
 with open("data/json/index_to_id.json", "r") as f:
     index_to_id = json.load(f)
-
 index_to_id = {int(k): v for k, v in index_to_id.items()}
 
+def normalize_matrix(mat: np.ndarray) -> np.ndarray:
+    norms = np.linalg.norm(mat, axis=1, keepdims=True)
+    norms[norms == 0] = 1.0
+    return mat / norms
+
+nlp_embeddings = normalize_matrix(nlp_embeddings)
+content_embeddings = normalize_matrix(content_embeddings)
+compatibility_embeddings = normalize_matrix(compatibility_embeddings)
+
 model = SentenceTransformer("BAAI/bge-base-en-v1.5")
-
-QUERY_PREFIX = "Represent this sentence for searching relevant passages: "
-
 
 def get_recommendations(anime_id: int, limit: int = 10) -> List[Tuple[int, float]]:
     """Get similar anime based on content compatibility"""
@@ -31,7 +36,6 @@ def get_recommendations(anime_id: int, limit: int = 10) -> List[Tuple[int, float
     similarities = cosine_similarity(query_vector, compatibility_embeddings).flatten()
     
     similar_indices = similarities.argsort()[::-1][1:limit + 1]
-    
     return [(int(index_to_id[i]), float(similarities[i])) for i in similar_indices]
 
 
@@ -59,74 +63,53 @@ def get_recommendations_by_list(anime_ids: List[int], limit: int = 10) -> List[T
 
 
 def get_recommendations_from_text(query: str, limit: int = 10) -> List[int]:
-    """
-    Natural language search using NLP embeddings
-    Example: 'dark psychological thriller' or 'cute slice of life'
-    """
-    query_with_prefix = QUERY_PREFIX + query
-    query_embedding = model.encode([query_with_prefix], normalize_embeddings=True)[0].reshape(1, -1)
-    
+    """NLP search using text embeddings"""
+    query_embedding = model.encode([query], normalize_embeddings=True)[0].reshape(1, -1)
     similarities = cosine_similarity(query_embedding, nlp_embeddings).flatten()
     similar_indices = similarities.argsort()[::-1][:limit]
-    
     return [int(index_to_id[i]) for i in similar_indices]
 
 
 def get_recommendations_from_text_with_scores(query: str, limit: int = 10) -> List[Tuple[int, float]]:
-    """
-    Natural language search with similarity scores
-    Returns: List of (anime_id, score) tuples
-    """
-    query_with_prefix = QUERY_PREFIX + query
-    query_embedding = model.encode([query_with_prefix], normalize_embeddings=True)[0].reshape(1, -1)
-    
+    """NLP search with similarity scores"""
+    query_embedding = model.encode([query], normalize_embeddings=True)[0].reshape(1, -1)
     similarities = cosine_similarity(query_embedding, nlp_embeddings).flatten()
     similar_indices = similarities.argsort()[::-1][:limit]
-    
     return [(int(index_to_id[i]), float(similarities[i])) for i in similar_indices]
 
 
 def get_recommendations_semantic_search(query: str, limit: int = 10) -> List[Tuple[int, float]]:
-    """
-    Structured semantic search using content embeddings
-    Better for specific attribute queries like 'action anime with high rating'
-    """
-    query_with_prefix = QUERY_PREFIX + query
-    query_embedding = model.encode([query_with_prefix], normalize_embeddings=True)[0].reshape(1, -1)
-    
+    """Content-based search (structured attributes)"""
+    query_embedding = model.encode([query], normalize_embeddings=True)[0].reshape(1, -1)
     similarities = cosine_similarity(query_embedding, content_embeddings).flatten()
     similar_indices = similarities.argsort()[::-1][:limit]
-    
     return [(int(index_to_id[i]), float(similarities[i])) for i in similar_indices]
 
 
-def hybrid_text_search(query: str, 
-                       limit: int = 10,
-                       nlp_weight: float = 0.6,
-                       content_weight: float = 0.4) -> List[Tuple[int, float]]:
+def hybrid_text_search(
+    query: str, 
+    limit: int = 10, 
+    nlp_weight: float = 0.6, 
+    content_weight: float = 0.4
+) -> List[Tuple[int, float]]:
     """
-    Combines NLP and content-based search for better results
+    Combines NLP and content embeddings for better recommendations.
     
-    Args:
-        query: User's search query
-        limit: Number of results to return
-        nlp_weight: Weight for conversational search (0-1)
-        content_weight: Weight for structured search (0-1)
-    
-    Returns:
-        List of (anime_id, combined_score) sorted by relevance
+    Returns a list of (anime_id, combined_score).
     """
     total = nlp_weight + content_weight
     nlp_weight /= total
     content_weight /= total
-    query_with_prefix = QUERY_PREFIX + query
-    query_embedding = model.encode([query_with_prefix], normalize_embeddings=True)[0].reshape(1, -1)
-    
+
+    query_embedding = model.encode([query], normalize_embeddings=True)[0].reshape(1, -1)
+
     nlp_similarities = cosine_similarity(query_embedding, nlp_embeddings).flatten()
     content_similarities = cosine_similarity(query_embedding, content_embeddings).flatten()
-    
+
+    nlp_similarities /= np.max(nlp_similarities)
+    content_similarities /= np.max(content_similarities)
+
     combined_scores = nlp_weight * nlp_similarities + content_weight * content_similarities
-    
     similar_indices = combined_scores.argsort()[::-1][:limit]
-    
+
     return [(int(index_to_id[i]), float(combined_scores[i])) for i in similar_indices]
