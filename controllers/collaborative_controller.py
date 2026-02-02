@@ -2,7 +2,7 @@ from typing import List
 from fastapi import APIRouter, Query, HTTPException
 from recommender.AnimeDataLoader import enrich_scored_recommendations
 
-from models.models import (
+from models import (
     CollaborativeRecommendationRequest,
     RecommendedAnime,
     PredictionResponse,

@@ -1,7 +1,7 @@
 from typing import List
 from functools import lru_cache
 from fastapi import APIRouter, HTTPException, Query, Body
-from models.models import  RecommendationResponse, RecommendedAnime
+from models import  RecommendationResponse, RecommendedAnime
 from recommender.AnimeDataLoader import enrich_scored_recommendations
 
 from recommender.recommender import (

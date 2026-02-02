@@ -9,7 +9,7 @@ from recommender.hybrid_recommender import (
     get_hybrid_recommendations_with_text_from_favorites
 )
 
-from models.models import (
+from models import (
     CollaborativeRecommendationRequest,
     CompatibilityRequest,
     CompatibilityResponse,
