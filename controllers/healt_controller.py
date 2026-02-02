@@ -1,6 +1,6 @@
 from fastapi import  APIRouter, Request
 from settings import settings
-from recommender.AnimeDataLoader import get_loader_status
+from data.loader import get_loader_status
 
 router = APIRouter(prefix="/v1", tags=["Health"])
 

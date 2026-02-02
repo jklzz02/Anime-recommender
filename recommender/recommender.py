@@ -2,7 +2,7 @@ import numpy as np
 import json
 from typing import List, Tuple
 from sklearn.metrics.pairwise import cosine_similarity
-from sentence_transformers import SentenceTransformer
+from .transformer import get_transformer
 
 content_embeddings = np.load("data/embeddings/anime_embeddings.npy")
 nlp_embeddings = np.load("data/embeddings/anime_nlp_embeddings.npy")
@@ -24,7 +24,7 @@ nlp_embeddings = normalize_matrix(nlp_embeddings)
 content_embeddings = normalize_matrix(content_embeddings)
 compatibility_embeddings = normalize_matrix(compatibility_embeddings)
 
-model = SentenceTransformer("BAAI/bge-base-en-v1.5")
+model = get_transformer()
 
 def get_recommendations(anime_id: int, limit: int = 10) -> List[Tuple[int, float]]:
     """Get similar anime based on content compatibility"""
@@ -84,32 +84,3 @@ def get_recommendations_semantic_search(query: str, limit: int = 10) -> List[Tup
     similarities = cosine_similarity(query_embedding, content_embeddings).flatten()
     similar_indices = similarities.argsort()[::-1][:limit]
     return [(int(index_to_id[i]), float(similarities[i])) for i in similar_indices]
-
-
-def hybrid_text_search(
-    query: str, 
-    limit: int = 10, 
-    nlp_weight: float = 0.6, 
-    content_weight: float = 0.4
-) -> List[Tuple[int, float]]:
-    """
-    Combines NLP and content embeddings for better recommendations.
-    
-    Returns a list of (anime_id, combined_score).
-    """
-    total = nlp_weight + content_weight
-    nlp_weight /= total
-    content_weight /= total
-
-    query_embedding = model.encode([query], normalize_embeddings=True)[0].reshape(1, -1)
-
-    nlp_similarities = cosine_similarity(query_embedding, nlp_embeddings).flatten()
-    content_similarities = cosine_similarity(query_embedding, content_embeddings).flatten()
-
-    nlp_similarities /= np.max(nlp_similarities)
-    content_similarities /= np.max(content_similarities)
-
-    combined_scores = nlp_weight * nlp_similarities + content_weight * content_similarities
-    similar_indices = combined_scores.argsort()[::-1][:limit]
-
-    return [(int(index_to_id[i]), float(combined_scores[i])) for i in similar_indices]

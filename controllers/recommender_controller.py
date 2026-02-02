@@ -2,9 +2,9 @@ from typing import List
 from functools import lru_cache
 from fastapi import APIRouter, HTTPException, Query, Body
 from models import  RecommendationResponse, RecommendedAnime
-from recommender.AnimeDataLoader import enrich_scored_recommendations
+from data.loader import enrich_scored_recommendations
 
-from recommender.recommender import (
+from recommender import (
     get_recommendations,
     get_recommendations_by_list,
     get_recommendations_from_text_with_scores,

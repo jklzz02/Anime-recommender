@@ -2,13 +2,15 @@ import numpy as np
 import json
 from typing import List, Dict, Tuple, Optional
 from sklearn.metrics.pairwise import cosine_similarity
-from sentence_transformers import SentenceTransformer
+from .transformer import get_transformer
 
 content_embeddings = np.load("data/embeddings/anime_embeddings.npy")
 nlp_embeddings = np.load("data/embeddings/anime_nlp_embeddings.npy")
 compatibility_embeddings = np.load("data/embeddings/anime_compatibility_embeddings.npy")
 anime_cf_embeddings = np.load("data/embeddings/anime_cf_embeddings.npy")
 user_embeddings = np.load("data/embeddings/user_embeddings.npy")
+
+model = get_transformer()
 
 with open("data/json/id_to_index.json", "r") as f:
     id_to_index = json.load(f)
@@ -25,8 +27,6 @@ with open("data/json/user_mappings.json", "r") as f:
 with open("data/json/rating_stats.json", "r") as f:
     rating_stats = json.load(f)
     global_mean = rating_stats["global_mean"]
-
-model = SentenceTransformer("BAAI/bge-base-en-v1.5")
 
 QUERY_PREFIX = "Represent this sentence for searching relevant passages: "
 
@@ -431,3 +431,32 @@ def get_similar_users_from_favorites(user_anime_ids: List[int],
 
     sorted_indices = similarities.argsort()[::-1][:limit]
     return [(idx, float(similarities[idx])) for idx in sorted_indices]
+
+
+def hybrid_text_search(
+    query: str, 
+    limit: int = 10, 
+    nlp_weight: float = 0.6, 
+    content_weight: float = 0.4
+) -> List[Tuple[int, float]]:
+    """
+    Combines NLP and content embeddings for better recommendations.
+    
+    Returns a list of (anime_id, combined_score).
+    """
+    total = nlp_weight + content_weight
+    nlp_weight /= total
+    content_weight /= total
+
+    query_embedding = model.encode([query], normalize_embeddings=True)[0].reshape(1, -1)
+
+    nlp_similarities = cosine_similarity(query_embedding, nlp_embeddings).flatten()
+    content_similarities = cosine_similarity(query_embedding, content_embeddings).flatten()
+
+    nlp_similarities /= np.max(nlp_similarities)
+    content_similarities /= np.max(content_similarities)
+
+    combined_scores = nlp_weight * nlp_similarities + content_weight * content_similarities
+    similar_indices = combined_scores.argsort()[::-1][:limit]
+
+    return [(int(index_to_id[i]), float(combined_scores[i])) for i in similar_indices]

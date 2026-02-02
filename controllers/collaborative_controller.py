@@ -1,6 +1,6 @@
 from typing import List
 from fastapi import APIRouter, Query, HTTPException
-from recommender.AnimeDataLoader import enrich_scored_recommendations
+from data.loader.AnimeDataLoader import enrich_scored_recommendations
 
 from models import (
     CollaborativeRecommendationRequest,
@@ -9,7 +9,7 @@ from models import (
     SimilarUserResponse
 )
 
-from recommender.hybrid_recommender import (
+from recommender import (
     get_cf_recommendations_from_favorites,
     get_cf_similar_anime,
     predict_rating_from_favorites,
