@@ -2,7 +2,7 @@ import numpy as np
 import json
 from typing import List, Dict, Tuple, Optional
 from sklearn.metrics.pairwise import cosine_similarity
-from .transformer import get_transformer
+from loader import get_transformer
 
 content_embeddings = np.load("data/embeddings/anime_embeddings.npy")
 nlp_embeddings = np.load("data/embeddings/anime_nlp_embeddings.npy")

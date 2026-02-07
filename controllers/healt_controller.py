@@ -1,6 +1,6 @@
 from fastapi import  APIRouter, Request
 from settings import settings
-from data.loader import get_loader_status
+from loader import get_loader_status
 
 router = APIRouter(prefix="/v1", tags=["Health"])
 

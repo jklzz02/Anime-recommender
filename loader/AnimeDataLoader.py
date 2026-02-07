@@ -63,6 +63,23 @@ class AnimeDataLoader:
         except Exception as e:
             logger.warning(f"Could not load id_to_index.json: {e}")
             self._id_to_index = None
+
+    def _load_dataframe(self) -> None:
+        """Load the anime dataset into a DataFrame with error handling"""
+
+        if hasattr(self, "_df") and self._df is not None:
+            return
+
+        try:
+            self._df = pd.read_csv(self.data_path, delimiter="\t", encoding='utf-8')
+        except UnicodeDecodeError:
+            logger.warning("UTF-8 decode failed, trying latin-1 encoding")
+            self._df = pd.read_csv(self.data_path, delimiter="\t", encoding='latin-1')
+        
+        self._df.columns = [
+            "Id", "Name", "Started_airing", "Score", "Release_year",
+            "Synopsis", "Episodes", "Studio", "Rating", "Type", "Source", "Genres"
+        ]
     
     def _safe_convert(self, value, converter, default=None):
         """Safely convert a value with a fallback"""
@@ -96,23 +113,13 @@ class AnimeDataLoader:
             logger.info(f"Loading anime dataset from {self.data_path}")
             
             self._load_id_mappings()
-            
-            try:
-                df = pd.read_csv(self.data_path, delimiter="\t", encoding='utf-8')
-            except UnicodeDecodeError:
-                logger.warning("UTF-8 decode failed, trying latin-1 encoding")
-                df = pd.read_csv(self.data_path, delimiter="\t", encoding='latin-1')
-            
-            df.columns = [
-                "Id", "Name", "Started_airing", "Score", "Release_year",
-                "Synopsis", "Episodes", "Studio", "Rating", "Type", "Source", "Genres"
-            ]
+            self._load_dataframe()
             
             self._anime_dict = {}
             skipped_count = 0
             embedding_mismatch = 0
             
-            for idx, row in df.iterrows():
+            for idx, row in self._df.iterrows():
                 try:
                     anime_id = self._safe_convert(row["Id"], int)
                     
@@ -313,19 +320,7 @@ class AnimeDataLoader:
         except Exception as e:
             logger.error(f"Error enriching hybrid recommendations: {e}")
             return []
-    
-    @property
-    def is_loaded(self) -> bool:
-        """Check if data is loaded"""
-        return self._is_loaded
-    
-    @property
-    def anime_count(self) -> int:
-        """Get total count of anime in database"""
-        if self._anime_dict is None:
-            return 0
-        return len(self._anime_dict)
-    
+        
     def get_stats(self) -> dict:
         """Get loader statistics"""
         cache_info = self.get_anime.cache_info()
@@ -340,3 +335,21 @@ class AnimeDataLoader:
             "cache_size": cache_info.currsize,
             "cache_max_size": cache_info.maxsize
         }
+    
+    @property
+    def anime_data_frame(self) -> Optional[pd.DataFrame]:
+        """Get the raw anime DataFrame (if loaded)"""
+        self._load_dataframe()
+        return self._df
+    
+    @property
+    def is_loaded(self) -> bool:
+        """Check if data is loaded"""
+        return self._is_loaded
+    
+    @property
+    def anime_count(self) -> int:
+        """Get total count of anime in database"""
+        if self._anime_dict is None:
+            return 0
+        return len(self._anime_dict)

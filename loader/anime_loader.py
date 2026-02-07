@@ -1,6 +1,7 @@
 
 import logging
 from typing import Dict, List, Optional, Tuple
+from pandas import DataFrame
 from .AnimeDataLoader import AnimeDataLoader, AnimeDataLoaderError
 
 logging.basicConfig(
@@ -23,6 +24,14 @@ def get_anime_data_loader() -> AnimeDataLoader:
         except AnimeDataLoaderError as e:
             logger.error(f"✗ Failed to load anime data: {e}")
     return __anime_data_loader
+
+def get_anime_data_frame() -> Optional[DataFrame]:
+    """Get the raw anime DataFrame (if loaded)"""
+    try:
+        return get_anime_data_loader().anime_data_frame
+    except Exception as e:
+        logger.error(f"Error in get_anime_data_frame: {e}")
+        return None
 
 def get_anime_details(anime_id: int) -> Optional[dict]:
     """Get full anime details by ID (cached)"""

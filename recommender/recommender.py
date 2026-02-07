@@ -2,7 +2,7 @@ import numpy as np
 import json
 from typing import List, Tuple
 from sklearn.metrics.pairwise import cosine_similarity
-from .transformer import get_transformer
+from loader import get_transformer
 
 content_embeddings = np.load("data/embeddings/anime_embeddings.npy")
 nlp_embeddings = np.load("data/embeddings/anime_nlp_embeddings.npy")
@@ -13,6 +13,7 @@ with open("data/json/id_to_index.json", "r") as f:
 
 with open("data/json/index_to_id.json", "r") as f:
     index_to_id = json.load(f)
+    
 index_to_id = {int(k): v for k, v in index_to_id.items()}
 
 def normalize_matrix(mat: np.ndarray) -> np.ndarray:

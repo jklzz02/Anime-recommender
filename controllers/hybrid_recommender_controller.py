@@ -1,6 +1,6 @@
 from typing import List
 from fastapi import APIRouter, HTTPException
-from data.loader import enrich_hybrid_recommendations, get_anime_details
+from loader import enrich_hybrid_recommendations, get_anime_details
 
 from recommender import (
     calculate_compatibility_score,
