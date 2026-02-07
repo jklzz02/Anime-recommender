@@ -1,6 +1,6 @@
 from typing import List
 from fastapi import APIRouter, Query, HTTPException
-from data.loader.AnimeDataLoader import enrich_scored_recommendations
+from data.loader import enrich_scored_recommendations
 
 from models import (
     CollaborativeRecommendationRequest,
