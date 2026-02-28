@@ -24,6 +24,9 @@ class Settings(BaseSettings):
     allowed_domains: str
     ssl_keyfile_path: str
     ssl_certfile_path: str
+    enable_rest: bool = True
+    enable_grpc: bool = False
+    grpc_port: int = 50051
 
     @property
     def allowed_cors_origins(self) -> list[str]:
