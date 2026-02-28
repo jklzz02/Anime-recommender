@@ -26,9 +26,7 @@ if _version_not_supported:
 
 
 class AnimeRecommenderStub(object):
-    """─── Service ──────────────────────────────────────────────────────────────────
-
-    """
+    """Missing associated documentation comment in .proto file."""
 
     def __init__(self, channel):
         """Constructor.
@@ -40,6 +38,11 @@ class AnimeRecommenderStub(object):
                 '/recommender.AnimeRecommender/GetCompatible',
                 request_serializer=recommender__pb2.CompatibleRequest.SerializeToString,
                 response_deserializer=recommender__pb2.CompatibleResponse.FromString,
+                _registered_method=True)
+        self.GetCfReccomendations = channel.unary_unary(
+                '/recommender.AnimeRecommender/GetCfReccomendations',
+                request_serializer=recommender__pb2.CollaborativeRecommendationRequest.SerializeToString,
+                response_deserializer=recommender__pb2.CollaborativeRecommendationResponse.FromString,
                 _registered_method=True)
         self.GetCompatibility = channel.unary_unary(
                 '/recommender.AnimeRecommender/GetCompatibility',
@@ -59,38 +62,34 @@ class AnimeRecommenderStub(object):
 
 
 class AnimeRecommenderServicer(object):
-    """─── Service ──────────────────────────────────────────────────────────────────
-
-    """
+    """Missing associated documentation comment in .proto file."""
 
     def GetCompatible(self, request, context):
-        """Returns a ranked list of compatible anime for a user's favourites
-        Maps to: POST /v1/compatible
-        """
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def GetCfReccomendations(self, request, context):
+        """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
     def GetCompatibility(self, request, context):
-        """Returns the compatibility score of a single anime against a user's favourites
-        Maps to: POST /v1/compatibility/score
-        """
+        """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
     def GetCompatibilityScores(self, request, context):
-        """Batch version: returns scores for multiple target anime in one call
-        Replaces the client-side forkJoin over GetCompatibility
-        """
+        """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
     def GetRelated(self, request, context):
-        """Returns IDs of content-similar anime to a given anime
-        Maps to: GET /v1/recommend?anime_id=...&limit=...
-        """
+        """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
@@ -102,6 +101,11 @@ def add_AnimeRecommenderServicer_to_server(servicer, server):
                     servicer.GetCompatible,
                     request_deserializer=recommender__pb2.CompatibleRequest.FromString,
                     response_serializer=recommender__pb2.CompatibleResponse.SerializeToString,
+            ),
+            'GetCfReccomendations': grpc.unary_unary_rpc_method_handler(
+                    servicer.GetCfReccomendations,
+                    request_deserializer=recommender__pb2.CollaborativeRecommendationRequest.FromString,
+                    response_serializer=recommender__pb2.CollaborativeRecommendationResponse.SerializeToString,
             ),
             'GetCompatibility': grpc.unary_unary_rpc_method_handler(
                     servicer.GetCompatibility,
@@ -127,9 +131,7 @@ def add_AnimeRecommenderServicer_to_server(servicer, server):
 
  # This class is part of an EXPERIMENTAL API.
 class AnimeRecommender(object):
-    """─── Service ──────────────────────────────────────────────────────────────────
-
-    """
+    """Missing associated documentation comment in .proto file."""
 
     @staticmethod
     def GetCompatible(request,
@@ -148,6 +150,33 @@ class AnimeRecommender(object):
             '/recommender.AnimeRecommender/GetCompatible',
             recommender__pb2.CompatibleRequest.SerializeToString,
             recommender__pb2.CompatibleResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def GetCfReccomendations(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/recommender.AnimeRecommender/GetCfReccomendations',
+            recommender__pb2.CollaborativeRecommendationRequest.SerializeToString,
+            recommender__pb2.CollaborativeRecommendationResponse.FromString,
             options,
             channel_credentials,
             insecure,

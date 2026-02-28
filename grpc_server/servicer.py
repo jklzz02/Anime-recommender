@@ -6,6 +6,7 @@ from recommender import (
     get_most_compatible_from_favourites,
     calculate_compatibility_score,
     get_recommendations,
+    get_cf_recommendations_from_favorites
 )
 
 class AnimeRecommenderServicer(recommender_pb2_grpc.AnimeRecommenderServicer):
@@ -31,6 +32,25 @@ class AnimeRecommenderServicer(recommender_pb2_grpc.AnimeRecommenderServicer):
             for anime_id, score in results
         ]
         return recommender_pb2.CompatibleResponse(data=data, scale="1-100")
+    
+    def GetCfReccomendations(self, request, context):
+        try:
+            result = get_cf_recommendations_from_favorites(
+                user_anime_ids=request.user_favourite_ids,
+                limit=request.limit if request.limit > 0 else 10
+                )
+            
+            if not result:
+                context.abort(grpc.StatusCode.NOT_FOUND, "No anime found to recommend.")
+                return recommender_pb2.CollaborativeRecommendationResponse()
+            
+            return recommender_pb2.CollaborativeRecommendationResponse(
+                recommended=[anime_id for anime_id, _ in result]
+            )
+            
+        except Exception as e:
+            context.abort(grpc.StatusCode.INTERNAL, str(e))
+            return recommender_pb2.CollaborativeRecommendationResponse()
 
     def GetCompatibility(self, request, context):
         try:

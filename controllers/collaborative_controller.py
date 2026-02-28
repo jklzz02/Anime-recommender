@@ -24,7 +24,7 @@ def cf_recommend_for_user_ids(request: CollaborativeRecommendationRequest):
     try:
         results = get_cf_recommendations_from_favorites(request.user_favourite_ids, request.limit)
         if not results:
-            raise HTTPException(status_code=404, detail="User not found in the system.")
+            raise HTTPException(status_code=404)
 
         return [aid for aid, _ in results]
     except HTTPException:
@@ -38,7 +38,7 @@ def cf_recommend_for_user(request: CollaborativeRecommendationRequest):
     try:
         results = get_cf_recommendations_from_favorites(request.user_favourite_ids, request.limit)
         if not results:
-            raise HTTPException(status_code=404, detail="User not found in the system.")
+            raise HTTPException(status_code=404)
 
         enriched = enrich_scored_recommendations(results)
         if not enriched:
@@ -112,7 +112,7 @@ def similar_users(request: CollaborativeRecommendationRequest):
     try:
         results = get_similar_users_from_favorites(request.user_favourite_ids, request.limit)
         if not results:
-            raise HTTPException(status_code=404, detail="User not found in the system.")
+            raise HTTPException(status_code=404)
 
         return [SimilarUserResponse(user_id=uid, similarity_score=score) for uid, score in results]
     except HTTPException:

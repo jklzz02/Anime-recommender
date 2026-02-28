@@ -24,7 +24,7 @@ _sym_db = _symbol_database.Default()
 
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x11recommender.proto\x12\x0brecommender\">\n\x11\x43ompatibleRequest\x12\x1a\n\x12user_favourite_ids\x18\x01 \x03(\x05\x12\r\n\x05limit\x18\x02 \x01(\x05\"@\n\x0f\x43ompatibleAnime\x12\x10\n\x08\x61nime_id\x18\x01 \x01(\x05\x12\x1b\n\x13\x63ompatibility_score\x18\x02 \x01(\x01\"O\n\x12\x43ompatibleResponse\x12*\n\x04\x64\x61ta\x18\x01 \x03(\x0b\x32\x1c.recommender.CompatibleAnime\x12\r\n\x05scale\x18\x02 \x01(\t\"K\n\x14\x43ompatibilityRequest\x12\x17\n\x0ftarget_anime_id\x18\x01 \x01(\x05\x12\x1a\n\x12user_favourite_ids\x18\x02 \x03(\x05\"\\\n\x15\x43ompatibilityResponse\x12\x17\n\x0ftarget_anime_id\x18\x01 \x01(\x05\x12\x1b\n\x13\x63ompatibility_score\x18\x02 \x01(\x01\x12\r\n\x05scale\x18\x03 \x01(\t\"Q\n\x19\x43ompatibilityBatchRequest\x12\x18\n\x10target_anime_ids\x18\x01 \x03(\x05\x12\x1a\n\x12user_favourite_ids\x18\x02 \x03(\x05\"P\n\x1a\x43ompatibilityBatchResponse\x12\x32\n\x06scores\x18\x01 \x03(\x0b\x32\".recommender.CompatibilityResponse\"1\n\x0eRelatedRequest\x12\x10\n\x08\x61nime_id\x18\x01 \x01(\x05\x12\r\n\x05limit\x18\x02 \x01(\x05\"$\n\x0fRelatedResponse\x12\x11\n\tanime_ids\x18\x01 \x03(\x05\x32\xf3\x02\n\x10\x41nimeRecommender\x12P\n\rGetCompatible\x12\x1e.recommender.CompatibleRequest\x1a\x1f.recommender.CompatibleResponse\x12Y\n\x10GetCompatibility\x12!.recommender.CompatibilityRequest\x1a\".recommender.CompatibilityResponse\x12i\n\x16GetCompatibilityScores\x12&.recommender.CompatibilityBatchRequest\x1a\'.recommender.CompatibilityBatchResponse\x12G\n\nGetRelated\x12\x1b.recommender.RelatedRequest\x1a\x1c.recommender.RelatedResponseb\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x11recommender.proto\x12\x0brecommender\">\n\x11\x43ompatibleRequest\x12\x1a\n\x12user_favourite_ids\x18\x01 \x03(\x05\x12\r\n\x05limit\x18\x02 \x01(\x05\"@\n\x0f\x43ompatibleAnime\x12\x10\n\x08\x61nime_id\x18\x01 \x01(\x05\x12\x1b\n\x13\x63ompatibility_score\x18\x02 \x01(\x01\"O\n\x12\x43ompatibleResponse\x12*\n\x04\x64\x61ta\x18\x01 \x03(\x0b\x32\x1c.recommender.CompatibleAnime\x12\r\n\x05scale\x18\x02 \x01(\t\"K\n\x14\x43ompatibilityRequest\x12\x17\n\x0ftarget_anime_id\x18\x01 \x01(\x05\x12\x1a\n\x12user_favourite_ids\x18\x02 \x03(\x05\"\\\n\x15\x43ompatibilityResponse\x12\x17\n\x0ftarget_anime_id\x18\x01 \x01(\x05\x12\x1b\n\x13\x63ompatibility_score\x18\x02 \x01(\x01\x12\r\n\x05scale\x18\x03 \x01(\t\"Q\n\x19\x43ompatibilityBatchRequest\x12\x18\n\x10target_anime_ids\x18\x01 \x03(\x05\x12\x1a\n\x12user_favourite_ids\x18\x02 \x03(\x05\"P\n\x1a\x43ompatibilityBatchResponse\x12\x32\n\x06scores\x18\x01 \x03(\x0b\x32\".recommender.CompatibilityResponse\"O\n\"CollaborativeRecommendationRequest\x12\x1a\n\x12user_favourite_ids\x18\x01 \x03(\x05\x12\r\n\x05limit\x18\x02 \x01(\x05\":\n#CollaborativeRecommendationResponse\x12\x13\n\x0brecommended\x18\x01 \x03(\x05\"1\n\x0eRelatedRequest\x12\x10\n\x08\x61nime_id\x18\x01 \x01(\x05\x12\r\n\x05limit\x18\x02 \x01(\x05\"$\n\x0fRelatedResponse\x12\x11\n\tanime_ids\x18\x01 \x03(\x05\x32\xee\x03\n\x10\x41nimeRecommender\x12P\n\rGetCompatible\x12\x1e.recommender.CompatibleRequest\x1a\x1f.recommender.CompatibleResponse\x12y\n\x14GetCfReccomendations\x12/.recommender.CollaborativeRecommendationRequest\x1a\x30.recommender.CollaborativeRecommendationResponse\x12Y\n\x10GetCompatibility\x12!.recommender.CompatibilityRequest\x1a\".recommender.CompatibilityResponse\x12i\n\x16GetCompatibilityScores\x12&.recommender.CompatibilityBatchRequest\x1a\'.recommender.CompatibilityBatchResponse\x12G\n\nGetRelated\x12\x1b.recommender.RelatedRequest\x1a\x1c.recommender.RelatedResponseb\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
@@ -45,10 +45,14 @@ if not _descriptor._USE_C_DESCRIPTORS:
   _globals['_COMPATIBILITYBATCHREQUEST']._serialized_end=497
   _globals['_COMPATIBILITYBATCHRESPONSE']._serialized_start=499
   _globals['_COMPATIBILITYBATCHRESPONSE']._serialized_end=579
-  _globals['_RELATEDREQUEST']._serialized_start=581
-  _globals['_RELATEDREQUEST']._serialized_end=630
-  _globals['_RELATEDRESPONSE']._serialized_start=632
-  _globals['_RELATEDRESPONSE']._serialized_end=668
-  _globals['_ANIMERECOMMENDER']._serialized_start=671
-  _globals['_ANIMERECOMMENDER']._serialized_end=1042
+  _globals['_COLLABORATIVERECOMMENDATIONREQUEST']._serialized_start=581
+  _globals['_COLLABORATIVERECOMMENDATIONREQUEST']._serialized_end=660
+  _globals['_COLLABORATIVERECOMMENDATIONRESPONSE']._serialized_start=662
+  _globals['_COLLABORATIVERECOMMENDATIONRESPONSE']._serialized_end=720
+  _globals['_RELATEDREQUEST']._serialized_start=722
+  _globals['_RELATEDREQUEST']._serialized_end=771
+  _globals['_RELATEDRESPONSE']._serialized_start=773
+  _globals['_RELATEDRESPONSE']._serialized_end=809
+  _globals['_ANIMERECOMMENDER']._serialized_start=812
+  _globals['_ANIMERECOMMENDER']._serialized_end=1306
 # @@protoc_insertion_point(module_scope)
