@@ -3,7 +3,7 @@
 import grpc
 import warnings
 
-from proto import recommender_pb2 as proto_dot_recommender__pb2
+from grpc_server.pb2 import recommender_pb2 as proto_dot_recommender__pb2
 
 GRPC_GENERATED_VERSION = '1.78.0'
 GRPC_VERSION = grpc.__version__

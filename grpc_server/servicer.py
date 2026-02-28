@@ -1,6 +1,6 @@
 import grpc
 
-from grpc_server import recommender_pb2, recommender_pb2_grpc
+from grpc_server.pb2 import recommender_pb2, recommender_pb2_grpc
 
 from recommender import (
     get_most_compatible_from_favourites,
@@ -33,7 +33,7 @@ class AnimeRecommenderServicer(recommender_pb2_grpc.AnimeRecommenderServicer):
         ]
         return recommender_pb2.CompatibleResponse(data=data, scale="1-100")
     
-    def GetCfReccomendations(self, request, context):
+    def GetCfRecommendations(self, request, context):
         try:
             result = get_cf_recommendations_from_favorites(
                 user_anime_ids=request.user_favourite_ids,
