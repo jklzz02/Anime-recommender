@@ -1,4 +1,4 @@
-# Anime Recommender API
+# Anime Recommender Service
 
 A hybrid recommendation microservice for Anime, combining Content-Based Filtering, Collaborative Filtering, and Natural Language Processing. Exposes both a **REST (FastAPI)** and a **gRPC** interface.
 
