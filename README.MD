@@ -157,12 +157,13 @@ source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-**Build embeddings** (requires raw datasets placed in `data/`):
+**Download embeddings**:
 
 ```bash
-python data/build_embeddings.py
-python data/build_collaborative_embeddings.py
+python loader/embeddings_loader.py
 ```
+
+Ensures that the required embeddings are prestent in the `data` directory. If the required embeddings aren't already downloaded the script automatically fetches them from [jklzz02/anime-embeddings](https://huggingface.co/Jklzz02/anime-embeddings)
 
 **Configure environment:**
 

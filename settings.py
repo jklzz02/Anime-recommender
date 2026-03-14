@@ -1,5 +1,7 @@
 from enum import Enum
+
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
 
 class Environment(str, Enum):
     DEV = "dev"
@@ -30,8 +32,13 @@ class Settings(BaseSettings):
 
     @property
     def allowed_cors_origins(self) -> list[str]:
-        return self.allowed_domains.strip().split(",") if self.allowed_domains.strip() else []
+        return (
+            self.allowed_domains.strip().split(",")
+            if self.allowed_domains.strip()
+            else []
+        )
 
     model_config = SettingsConfigDict(env_file=".env")
 
-settings = Settings() # type: ignore
+
+settings = Settings()  # type: ignore
