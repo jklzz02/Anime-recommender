@@ -163,7 +163,7 @@ pip install -r requirements.txt
 python loader/embeddings_loader.py
 ```
 
-Ensures that the required embeddings are prestent in the `data` directory. If the required embeddings aren't already downloaded the script automatically fetches them from [jklzz02/anime-embeddings](https://huggingface.co/Jklzz02/anime-embeddings)
+Ensures that the required embeddings are prestent in the `data` directory. If the required embeddings aren't already downloaded the script automatically fetches them from [jklzz02/anime-embeddings](https://huggingface.co/Jklzz02/anime-embeddings/tree/main)
 
 **Configure environment:**
 
