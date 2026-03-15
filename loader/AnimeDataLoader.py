@@ -12,10 +12,11 @@ logging.basicConfig(
 
 logger = logging.getLogger(__name__)
 
-data_path = "../data/"
+_SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+_DATA_DIR = os.path.abspath(os.path.join(_SCRIPT_DIR, "../data"))
 
-json_dir_path = os.path.join(os.path.dirname(data_path), "json")
-data_path = os.path.join(os.path.dirname(data_path), "anime-dataset.csv")
+data_path = os.path.join(_DATA_DIR, "anime-dataset.csv")
+json_dir_path = os.path.join(_DATA_DIR, "json")
 id_to_index_path = os.path.join(json_dir_path, "id_to_index.json")
 
 
