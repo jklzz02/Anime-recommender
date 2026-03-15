@@ -1,4 +1,5 @@
 import os
+from colorama import Fore
 
 from huggingface_hub import hf_hub_download
 
@@ -18,12 +19,14 @@ FILES = [
 
 def ensure_data():
     for file in FILES:
-        local_path = os.path.join("data", file)
+        local_path = os.path.join("../data", file)
         if not os.path.exists(local_path):
             print(f"Downloading {file}...")
             hf_hub_download(
                 repo_id=REPO_ID, filename=file, repo_type="model", local_dir="data"
             )
+        else:
+            print(f"{Fore.GREEN}{local_path}{Fore.RESET} already loaded.s")
 
 
 if __name__ == "__main__":
