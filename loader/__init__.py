@@ -7,7 +7,22 @@ from .anime_loader import (
     get_loader_status,
 )
 from .AnimeDataLoader import AnimeDataLoader, AnimeDataLoaderError
-from .embeddings_loader import ensure_data
+from .embeddings_loader import (
+    ensure_data,
+    load_anime_embeddings,
+    load_anime_cf_embeddings,
+    load_anime_nlp_embeddings,
+    load_anime_compatibility_embeddings,
+    load_user_embeddings,
+    load_index_to_id,
+    load_id_to_index,
+    load_user_mappings,
+    load_rating_stats,
+)
+
+from .Embeddings import Embeddings
+from .Mappings import Mappings
+
 from .transformer_loader import DEFAULT_MODEL, get_transformer
 
 __all__ = [
@@ -21,5 +36,16 @@ __all__ = [
     "get_loader_status",
     "get_transformer",
     "ensure_data",
+    "load_anime_embeddings",
+    "load_anime_cf_embeddings",
+    "load_anime_nlp_embeddings",
+    "load_anime_compatibility_embeddings",
+    "load_user_embeddings",
+    "load_index_to_id",
+    "load_id_to_index",
+    "load_user_mappings",
+    "load_rating_stats",
+    "Embeddings",
+    "Mappings",
     "DEFAULT_MODEL",
 ]

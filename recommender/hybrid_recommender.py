@@ -1,32 +1,28 @@
 import numpy as np
-import json
 from typing import List, Dict, Tuple, Optional
 from sklearn.metrics.pairwise import cosine_similarity
-from loader import get_transformer
+from loader import Embeddings, Mappings, get_transformer
 
-content_embeddings = np.load("data/embeddings/anime_embeddings.npy")
-nlp_embeddings = np.load("data/embeddings/anime_nlp_embeddings.npy")
-compatibility_embeddings = np.load("data/embeddings/anime_compatibility_embeddings.npy")
-anime_cf_embeddings = np.load("data/embeddings/anime_cf_embeddings.npy")
-user_embeddings = np.load("data/embeddings/user_embeddings.npy")
+embeddings = Embeddings()
+mappings = Mappings()
 
+content_embeddings = embeddings.anime_content
+nlp_embeddings = embeddings.anime_nlp
+compatibility_embeddings = embeddings.anime_compatibility
+anime_cf_embeddings = embeddings.anime_cf
+user_embeddings = embeddings.user_embeddings
 model = get_transformer()
 
-with open("data/json/id_to_index.json", "r") as f:
-    id_to_index = json.load(f)
+id_to_index = mappings.id_to_index
+index_to_id = mappings.index_to_id
+index_to_id = {int(k): v for k, v in index_to_id.items()}
 
-with open("data/json/index_to_id.json", "r") as f:
-    index_to_id = json.load(f)
-    index_to_id = {int(k): v for k, v in index_to_id.items()}
+user_mappings = mappings.user_mappings
+anime_to_cf_idx = {int(k): v for k, v in user_mappings["anime_to_idx"].items()}
+cf_idx_to_anime = {int(k): v for k, v in user_mappings["idx_to_anime"].items()}
 
-with open("data/json/user_mappings.json", "r") as f:
-    user_mappings = json.load(f)
-    anime_to_cf_idx = {int(k): v for k, v in user_mappings["anime_to_idx"].items()}
-    cf_idx_to_anime = {int(k): v for k, v in user_mappings["idx_to_anime"].items()}
-
-with open("data/json/rating_stats.json", "r") as f:
-    rating_stats = json.load(f)
-    global_mean = rating_stats["global_mean"]
+rating_stats = mappings.ratings
+global_mean = rating_stats["global_mean"]
 
 QUERY_PREFIX = "Represent this sentence for searching relevant passages: "
 
