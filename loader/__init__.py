@@ -18,6 +18,7 @@ from .embeddings_loader import (
     load_id_to_index,
     load_user_mappings,
     load_rating_stats,
+    get_data_status
 )
 
 from .Embeddings import Embeddings
@@ -45,6 +46,7 @@ __all__ = [
     "load_id_to_index",
     "load_user_mappings",
     "load_rating_stats",
+    "get_data_status",
     "Embeddings",
     "Mappings",
     "DEFAULT_MODEL",

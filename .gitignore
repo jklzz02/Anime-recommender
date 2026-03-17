@@ -2,8 +2,7 @@
 .venv
 .idea
 .vscode
-data/json/*
-data/embeddings/*
+data/*
 .ropeproject
 __pycache__
 .cache/

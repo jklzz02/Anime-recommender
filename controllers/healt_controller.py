@@ -1,6 +1,6 @@
 from fastapi import  APIRouter, Request
 from settings import settings
-from loader import get_loader_status
+from loader import get_loader_status, get_data_status
 
 router = APIRouter(prefix="/v1", tags=["Health"])
 
@@ -31,9 +31,12 @@ async def health_check(request: Request):
                 endpoints.setdefault(tag, []).append(route.path)
 
     loader_status = get_loader_status()
+    data_status = get_data_status()
+
     return {
-        "status": "healthy" if loader_status["is_loaded"] else "degraded",
+        "status": "healthy" if loader_status["is_loaded"] and data_status["is_healthy"] else "degraded",
         "version": settings.version,
         "anime_loader": loader_status,
+        "datasets" : data_status,
         "endpoints": endpoints
     }
