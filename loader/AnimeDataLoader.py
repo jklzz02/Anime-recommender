@@ -1,8 +1,7 @@
-import json
 import logging
-import os
 from functools import lru_cache
 from typing import Dict, List, Optional, Tuple
+from .embeddings_loader import load_anime_dataset, load_id_to_index
 
 import pandas as pd
 
@@ -12,17 +11,8 @@ logging.basicConfig(
 
 logger = logging.getLogger(__name__)
 
-_SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-_DATA_DIR = os.path.abspath(os.path.join(_SCRIPT_DIR, "../data"))
-
-data_path = os.path.join(_DATA_DIR, "anime-dataset.csv")
-json_dir_path = os.path.join(_DATA_DIR, "json")
-id_to_index_path = os.path.join(json_dir_path, "id_to_index.json")
-
-
 class AnimeDataLoaderError(Exception):
     """Custom exception for AnimeDataLoader errors"""
-
     pass
 
 
@@ -36,51 +26,27 @@ class AnimeDataLoader:
 
     def __init__(self):
         """Initialize the data loader with standard paths"""
-        self.data_path = data_path
-        self.id_to_index_path = id_to_index_path
 
         self._anime_dict: Optional[Dict[int, dict]] = None
         self._id_to_index: Optional[Dict[str, int]] = None
         self._is_loaded = False
         self._load_error: Optional[str] = None
 
-    def _validate_files_exist(self) -> bool:
-        """Validate that all required files exist"""
-        if not os.path.exists(self.data_path):
-            error_msg = f"Data file not found: {self.data_path}"
-            logger.error(error_msg)
-            self._load_error = error_msg
-            return False
-
-        if not os.path.exists(self.id_to_index_path):
-            logger.warning(
-                f"id_to_index.json not found at {self.id_to_index_path}, will skip validation"
-            )
-
-        return True
-
     def _load_id_mappings(self):
         """Load id_to_index mapping for validation"""
         try:
-            if os.path.exists(self.id_to_index_path):
-                with open(self.id_to_index_path, "r") as f:
-                    self._id_to_index = json.load(f)
-                logger.info(f"Loaded {len(self._id_to_index)} anime ID mappings")  # type: ignore
+            self._id_to_index = load_id_to_index()
         except Exception as e:
             logger.warning(f"Could not load id_to_index.json: {e}")
             self._id_to_index = None
 
     def _load_dataframe(self) -> None:
-        """Load the anime dataset into a DataFrame with error handling"""
+        """Load the anime dataset into a DataFrame"""
 
         if hasattr(self, "_df") and self._df is not None:
             return
 
-        try:
-            self._df = pd.read_csv(self.data_path, delimiter="\t", encoding="utf-8")
-        except UnicodeDecodeError:
-            logger.warning("UTF-8 decode failed, trying latin-1 encoding")
-            self._df = pd.read_csv(self.data_path, delimiter="\t", encoding="latin-1")
+        self._df = load_anime_dataset()
 
         self._df.columns = [
             "Id",
@@ -122,11 +88,8 @@ class AnimeDataLoader:
         if self._load_error:
             raise AnimeDataLoaderError(f"Cannot load data: {self._load_error}")
 
-        if not self._validate_files_exist():
-            raise AnimeDataLoaderError(f"Cannot load data: {self._load_error}")
-
         try:
-            logger.info(f"Loading anime dataset from {self.data_path}")
+            logger.info(f"Loading anime dataset and id mappings")
 
             self._load_id_mappings()
             self._load_dataframe()
@@ -231,10 +194,12 @@ class AnimeDataLoader:
 
             results = []
             for anime_id in anime_ids:
-                if isinstance(anime_id, int):
-                    anime = self.get_anime(anime_id)
-                    if anime:
-                        results.append(anime)
+                if not isinstance(anime_id, int):
+                    continue
+                
+                anime = self.get_anime(anime_id)
+                if anime:
+                    results.append(anime)
 
             return results
 
@@ -344,7 +309,6 @@ class AnimeDataLoader:
             "anime_count": self.anime_count,
             "has_error": self._load_error is not None,
             "error_message": self._load_error,
-            "data_path": str(self.data_path),
             "cache_hits": cache_info.hits,
             "cache_misses": cache_info.misses,
             "cache_size": cache_info.currsize,

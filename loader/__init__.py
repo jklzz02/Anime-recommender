@@ -18,6 +18,7 @@ from .embeddings_loader import (
     load_id_to_index,
     load_user_mappings,
     load_rating_stats,
+    load_anime_dataset,
     get_data_status
 )
 
@@ -46,6 +47,7 @@ __all__ = [
     "load_id_to_index",
     "load_user_mappings",
     "load_rating_stats",
+    "load_anime_dataset",
     "get_data_status",
     "Embeddings",
     "Mappings",

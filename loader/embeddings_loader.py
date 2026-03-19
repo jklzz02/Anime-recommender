@@ -2,6 +2,7 @@ import hashlib
 import os
 import logging
 import numpy as np
+import pandas as pd
 import json
 from colorama import Fore
 from huggingface_hub import hf_hub_download
@@ -72,6 +73,23 @@ def load_user_mappings():
 @lru_cache(maxsize=None)
 def load_rating_stats():
     return _load_index("rating_stats")
+
+@lru_cache(maxsize=None)
+def load_anime_dataset():
+    dataset_path = os.path.join(DATA_DIR, "anime-dataset.csv")
+    
+    try:
+        return pd.read_csv(dataset_path, delimiter="\t", encoding="utf-8")
+    
+    except FileNotFoundError as ex:
+        _logger.warning(f"Executing download attempt due to: {ex}")
+        _download("anime-dataset.csv")
+        return pd.read_csv(dataset_path, delimiter="\t", encoding="utf-8")
+    
+    except UnicodeDecodeError as ex:
+        _logger.error(f"Failed to decode dataset with utf-8, executing decoding attempt with latin-1")
+        return pd.read_csv(dataset_path, delimiter="\t", encoding="latin-1")
+
 
 def get_data_status():
     status: dict = {
