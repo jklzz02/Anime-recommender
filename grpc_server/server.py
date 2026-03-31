@@ -3,6 +3,7 @@ from colorama import Fore
 from concurrent import futures
 
 from grpc_server.pb2 import recommender_pb2_grpc
+from grpc_server.pb2.health import recommender_health_pb2_grpc
 from grpc_server.servicer import AnimeRecommenderServicer
 
 
@@ -18,6 +19,9 @@ def start_grpc_server(port: int) -> grpc.Server:
     """
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
     recommender_pb2_grpc.add_AnimeRecommenderServicer_to_server(
+        AnimeRecommenderServicer(), server
+    )
+    recommender_health_pb2_grpc.add_AnimeRecommenderHealthServicer_to_server(
         AnimeRecommenderServicer(), server
     )
     server.add_insecure_port(f"[::]:{port}")

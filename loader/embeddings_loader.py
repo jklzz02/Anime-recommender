@@ -92,16 +92,23 @@ def load_anime_dataset():
 
 
 def get_data_status():
-    status: dict = {
-        "is_healthy" : True
+    status = {
+        "is_healthy": True,
+        "set_status": []
     }
 
     for file in FILES:
         if not verify_file(file):
-            status[file] = "corrupted"
-            status["status"] = False
+            status["set_status"].append({
+                "file": file,
+                "status": "corrupted"
+            })
+            status["is_healthy"] = False
         else:
-            status[file] = "healthy"
+            status["set_status"].append({
+                "file": file,
+                "status": "healthy"
+            })
 
     return status
 

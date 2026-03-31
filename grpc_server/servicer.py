@@ -1,6 +1,12 @@
 import grpc
 
 from grpc_server.pb2 import recommender_pb2, recommender_pb2_grpc
+from grpc_server.pb2.health import recommender_health_pb2, recommender_health_pb2_grpc
+
+from loader import (
+    get_loader_status,
+    get_data_status,
+)
 
 from recommender import (
     get_most_compatible_from_favourites,
@@ -9,7 +15,51 @@ from recommender import (
     get_cf_recommendations_from_favorites
 )
 
-class AnimeRecommenderServicer(recommender_pb2_grpc.AnimeRecommenderServicer):
+class AnimeRecommenderServicer(
+    recommender_pb2_grpc.AnimeRecommenderServicer,
+    recommender_health_pb2_grpc.AnimeRecommenderHealthServicer):
+
+    def HealthCheck(self, request, context):
+        try:
+            loader_status = get_loader_status()
+            data_status = get_data_status()
+
+            anime_loader_status = recommender_health_pb2.AnimeLoaderStatus(
+                is_loaded=loader_status["is_loaded"],
+                has_error=loader_status["has_error"],
+                anime_count=loader_status["anime_count"],
+                error_message=loader_status["error_message"],
+                cache_hits=loader_status["cache_hits"],
+                cache_misses=loader_status["cache_misses"],
+                cache_size=loader_status["cache_size"],
+                cache_max_size=loader_status["cache_max_size"]
+            )
+
+            statuses = [
+                recommender_health_pb2.DataHealth(
+                    file=item["file"],
+                    status=item["status"]
+                )
+                for item in data_status["set_status"]
+            ]
+
+            print(statuses)
+
+            data_info = recommender_health_pb2.DataSetStatus(
+                is_healthy=data_status["is_healthy"],
+                set_status=statuses 
+            )
+
+            return recommender_health_pb2.HealthCheckResponse(
+                anime_loader_status=anime_loader_status,
+                data_sets_status=data_info,
+                version=1,
+                service_status="available"
+            )
+
+        except Exception as e:
+            context.abort(grpc.StatusCode.INTERNAL, str(e))
+            return recommender_health_pb2.HealthCheckResponse()
 
     def GetCompatible(self, request, context):
         try:
