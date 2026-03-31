@@ -43,8 +43,6 @@ class AnimeRecommenderServicer(
                 for item in data_status["set_status"]
             ]
 
-            print(statuses)
-
             data_info = recommender_health_pb2.DataSetStatus(
                 is_healthy=data_status["is_healthy"],
                 set_status=statuses 
