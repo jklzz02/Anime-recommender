@@ -5,7 +5,7 @@ from loader import get_loader_status, get_data_status
 router = APIRouter(prefix="/v1", tags=["Health"])
 
 @router.get("", tags=["Health"])
-async def root():
+def root():
     """Health check endpoint"""
     return {
         "status": "running",
@@ -21,7 +21,7 @@ async def root():
 
 
 @router.get("/health", tags=["Health"])
-async def health_check(request: Request):
+def health_check(request: Request):
     """Detailed health check with system status"""
     endpoints = {}
 
