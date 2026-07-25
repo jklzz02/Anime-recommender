@@ -1,4 +1,5 @@
 import logging
+from functools import lru_cache
 
 import pandas as pd
 
@@ -151,6 +152,7 @@ class AnimeDataLoader:
             self._load_error = error_msg
             raise AnimeDataLoaderError(error_msg) from e
 
+    @lru_cache(maxsize=1024)
     def get_anime(self, anime_id: int) -> dict | None:
         """
         Get anime details by ID (cached).
