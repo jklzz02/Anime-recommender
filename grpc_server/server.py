@@ -1,6 +1,7 @@
+from concurrent import futures
+
 import grpc
 from colorama import Fore
-from concurrent import futures
 
 from grpc_server.pb2 import recommender_pb2_grpc
 from grpc_server.pb2.health import recommender_health_pb2_grpc

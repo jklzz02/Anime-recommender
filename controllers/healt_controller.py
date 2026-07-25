@@ -1,8 +1,10 @@
-from fastapi import  APIRouter, Request
+from fastapi import APIRouter, Request
+
+from loader import get_data_status, get_loader_status
 from settings import settings
-from loader import get_loader_status, get_data_status
 
 router = APIRouter(prefix="/v1", tags=["Health"])
+
 
 @router.get("", tags=["Health"])
 def root():
@@ -15,8 +17,8 @@ def root():
             "collaborative filtering",
             "hybrid recommendations",
             "NLP text search",
-            "compatibility scoring"
-        ]
+            "compatibility scoring",
+        ],
     }
 
 
@@ -34,9 +36,11 @@ def health_check(request: Request):
     data_status = get_data_status()
 
     return {
-        "status": "healthy" if loader_status["is_loaded"] and data_status["is_healthy"] else "degraded",
+        "status": "healthy"
+        if loader_status["is_loaded"] and data_status["is_healthy"]
+        else "degraded",
         "version": settings.version,
         "anime_loader": loader_status,
-        "datasets" : data_status,
-        "endpoints": endpoints
+        "datasets": data_status,
+        "endpoints": endpoints,
     }

@@ -29,6 +29,7 @@ class Settings(BaseSettings):
     enable_rest: bool = True
     enable_grpc: bool = False
     grpc_port: int = 50051
+    transformer_model: str
 
     @property
     def allowed_cors_origins(self) -> list[str]:

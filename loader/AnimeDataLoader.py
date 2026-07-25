@@ -1,9 +1,9 @@
 import logging
 from functools import lru_cache
-from typing import Dict, List, Optional, Tuple
-from .embeddings_loader import load_anime_dataset, load_id_to_index
 
 import pandas as pd
+
+from .embeddings_loader import load_anime_dataset, load_id_to_index
 
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
@@ -11,9 +11,9 @@ logging.basicConfig(
 
 logger = logging.getLogger(__name__)
 
+
 class AnimeDataLoaderError(Exception):
     """Custom exception for AnimeDataLoader errors"""
-    pass
 
 
 class AnimeDataLoader:
@@ -27,10 +27,10 @@ class AnimeDataLoader:
     def __init__(self):
         """Initialize the data loader with standard paths"""
 
-        self._anime_dict: Optional[Dict[int, dict]] = None
-        self._id_to_index: Optional[Dict[str, int]] = None
+        self._anime_dict: dict[int, dict] | None = None
+        self._id_to_index: dict[str, int] | None = None
         self._is_loaded = False
-        self._load_error: Optional[str] = None
+        self._load_error: str | None = None
 
     def _load_id_mappings(self):
         """Load id_to_index mapping for validation"""
@@ -72,7 +72,7 @@ class AnimeDataLoader:
         except (ValueError, TypeError):
             return default
 
-    def load(self) -> Dict[int, dict]:
+    def load(self) -> dict[int, dict]:
         """
         Load anime dataset into memory.
 
@@ -89,7 +89,7 @@ class AnimeDataLoader:
             raise AnimeDataLoaderError(f"Cannot load data: {self._load_error}")
 
         try:
-            logger.info(f"Loading anime dataset and id mappings")
+            logger.info("Loading anime dataset and id mappings")
 
             self._load_id_mappings()
             self._load_dataframe()
@@ -147,13 +147,13 @@ class AnimeDataLoader:
             return self._anime_dict
 
         except Exception as e:
-            error_msg = f"Failed to load anime data: {str(e)}"
+            error_msg = f"Failed to load anime data: {e!s}"
             logger.error(error_msg, exc_info=True)
             self._load_error = error_msg
             raise AnimeDataLoaderError(error_msg) from e
 
     @lru_cache(maxsize=1024)
-    def get_anime(self, anime_id: int) -> Optional[dict]:
+    def get_anime(self, anime_id: int) -> dict | None:
         """
         Get anime details by ID (cached).
 
@@ -174,7 +174,7 @@ class AnimeDataLoader:
             logger.error(f"Error getting anime {anime_id}: {e}")
             return None
 
-    def get_anime_batch(self, anime_ids: List[int]) -> List[dict]:
+    def get_anime_batch(self, anime_ids: list[int]) -> list[dict]:
         """
         Get multiple anime details at once.
 
@@ -196,7 +196,7 @@ class AnimeDataLoader:
             for anime_id in anime_ids:
                 if not isinstance(anime_id, int):
                     continue
-                
+
                 anime = self.get_anime(anime_id)
                 if anime:
                     results.append(anime)
@@ -208,8 +208,8 @@ class AnimeDataLoader:
             return []
 
     def enrich_recommendations(
-        self, recommendations: List[Tuple[int, float]], include_score: bool = True
-    ) -> List[dict]:
+        self, recommendations: list[tuple[int, float]], include_score: bool = True
+    ) -> list[dict]:
         """
         Enrich recommendations with full anime details.
 
@@ -255,8 +255,8 @@ class AnimeDataLoader:
             return []
 
     def enrich_with_breakdown(
-        self, recommendations: List[Tuple[int, float, dict]]
-    ) -> List[dict]:
+        self, recommendations: list[tuple[int, float, dict]]
+    ) -> list[dict]:
         """
         Enrich hybrid recommendations with full details and score breakdown.
 
@@ -316,7 +316,7 @@ class AnimeDataLoader:
         }
 
     @property
-    def anime_data_frame(self) -> Optional[pd.DataFrame]:
+    def anime_data_frame(self) -> pd.DataFrame | None:
         """Get the raw anime DataFrame (if loaded)"""
         self._load_dataframe()
         return self._df

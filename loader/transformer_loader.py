@@ -1,16 +1,18 @@
 from logging import getLogger
-from sentence_transformers import SentenceTransformer
-from huggingface_hub.errors import HFValidationError
-from typing import Dict
 
-DEFAULT_MODEL: str = "BAAI/bge-base-en-v1.5"
+from huggingface_hub.errors import HFValidationError
+from sentence_transformers import SentenceTransformer
+
+from settings import settings
 
 __logger = getLogger(__name__)
-__loaded_models: Dict[str, SentenceTransformer]= {}
+__loaded_models: dict[str, SentenceTransformer] = {}
 
-def get_transformer(model_name: str = DEFAULT_MODEL) -> SentenceTransformer:
+
+def get_transformer(
+    model_name: str = settings.transformer_model,
+) -> SentenceTransformer:
     try:
-
         if model_name not in __loaded_models:
             __loaded_models[model_name] = SentenceTransformer(model_name)
 
@@ -18,8 +20,8 @@ def get_transformer(model_name: str = DEFAULT_MODEL) -> SentenceTransformer:
 
     except HFValidationError as e:
         __logger.error(f"Failed to load model '{model_name}' no such model found: {e}")
-        raise e
+        raise
 
     except Exception as e:
         __logger.error(f"Failed to load model '{model_name}': {e}")
-        raise e
+        raise
