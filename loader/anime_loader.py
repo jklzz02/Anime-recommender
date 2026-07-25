@@ -1,4 +1,5 @@
 import logging
+from functools import lru_cache
 
 from pandas import DataFrame
 
@@ -35,6 +36,7 @@ def get_anime_data_frame() -> DataFrame | None:
         return None
 
 
+@lru_cache(maxsize=1024)
 def get_anime_details(anime_id: int) -> dict | None:
     """Get full anime details by ID (cached)"""
     try:
@@ -44,6 +46,7 @@ def get_anime_details(anime_id: int) -> dict | None:
         return None
 
 
+@lru_cache(maxsize=1024)
 def enrich_simple_recommendations(anime_ids: list[int]) -> list[dict]:
     """Enrich a list of anime IDs with full details"""
     try:
@@ -53,6 +56,7 @@ def enrich_simple_recommendations(anime_ids: list[int]) -> list[dict]:
         return []
 
 
+@lru_cache(maxsize=1024)
 def enrich_recommendation_with_similarity(
     anime_tuple: list[tuple[int, float]],
 ) -> list[dict]:
@@ -69,6 +73,7 @@ def enrich_recommendation_with_similarity(
         return []
 
 
+@lru_cache(maxsize=1024)
 def enrich_scored_recommendations(
     recommendations: list[tuple[int, float]],
 ) -> list[dict]:
@@ -82,6 +87,7 @@ def enrich_scored_recommendations(
         return []
 
 
+@lru_cache(maxsize=1024)
 def enrich_hybrid_recommendations(
     recommendations: list[tuple[int, float, dict]],
 ) -> list[dict]:
