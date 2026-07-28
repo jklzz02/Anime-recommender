@@ -12,7 +12,6 @@ logger = logging.getLogger(__name__)
 
 __anime_data_loader: AnimeDataLoader | None = None
 
-
 def get_anime_data_loader() -> AnimeDataLoader:
     """Get or create the global AnimeDataLoader instance"""
     global __anime_data_loader
@@ -25,7 +24,6 @@ def get_anime_data_loader() -> AnimeDataLoader:
             logger.error(f"✗ Failed to load anime data: {e}")
     return __anime_data_loader
 
-
 def get_anime_data_frame() -> DataFrame | None:
     """Get the raw anime DataFrame (if loaded)"""
     try:
@@ -33,7 +31,6 @@ def get_anime_data_frame() -> DataFrame | None:
     except Exception as e:
         logger.error(f"Error in get_anime_data_frame: {e}")
         return None
-
 
 def get_anime_details(anime_id: int) -> dict | None:
     """Get full anime details by ID (cached)"""
@@ -43,7 +40,6 @@ def get_anime_details(anime_id: int) -> dict | None:
         logger.error(f"Error in get_anime_details({anime_id}): {e}")
         return None
 
-
 def enrich_simple_recommendations(anime_ids: list[int]) -> list[dict]:
     """Enrich a list of anime IDs with full details"""
     try:
@@ -52,10 +48,7 @@ def enrich_simple_recommendations(anime_ids: list[int]) -> list[dict]:
         logger.error(f"Error in enrich_simple_recommendations: {e}")
         return []
 
-
-def enrich_recommendation_with_similarity(
-    anime_tuple: list[tuple[int, float]],
-) -> list[dict]:
+def enrich_recommendation_with_similarity(anime_tuple: list[tuple[int, float]]) -> list[dict]:
     """Enrich a list of anime IDs with full details"""
     try:
         anime = get_anime_data_loader().get_anime_batch([aid for aid, _ in anime_tuple])
@@ -68,10 +61,7 @@ def enrich_recommendation_with_similarity(
         logger.error(f"Error in enrich_recommendation_with_similarity: {e}")
         return []
 
-
-def enrich_scored_recommendations(
-    recommendations: list[tuple[int, float]],
-) -> list[dict]:
+def enrich_scored_recommendations(recommendations: list[tuple[int, float]]) -> list[dict]:
     """Enrich recommendations with scores: [(anime_id, score), ...]"""
     try:
         return get_anime_data_loader().enrich_recommendations(
@@ -81,10 +71,7 @@ def enrich_scored_recommendations(
         logger.error(f"Error in enrich_scored_recommendations: {e}")
         return []
 
-
-def enrich_hybrid_recommendations(
-    recommendations: list[tuple[int, float, dict]],
-) -> list[dict]:
+def enrich_hybrid_recommendations(recommendations: list[tuple[int, float, dict]]) -> list[dict]:
     """Enrich hybrid recommendations: [(anime_id, score, breakdown), ...]"""
     try:
         return get_anime_data_loader().enrich_with_breakdown(recommendations)
@@ -107,5 +94,5 @@ def get_loader_status() -> dict:
             "cache_hits": 0,
             "cache_misses": 0,
             "cache_size": 0,
-            "cache_max_size": 0,
+            "cache_max_size": 0
         }

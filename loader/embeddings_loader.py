@@ -2,7 +2,7 @@ import hashlib
 import json
 import logging
 import os
-from functools import cache, lru_cache
+from functools import cache
 
 import numpy as np
 import pandas as pd
@@ -40,51 +40,41 @@ def ensure_data():
         if verify_file(file):
             _logger.info(f"{Fore.GREEN}{local_path}{Fore.RESET} already loaded")
 
-
-@lru_cache(maxsize=None)
+@cache
 def load_anime_embeddings():
     return _load_embedding("anime_embeddings")
-
 
 @cache
 def load_anime_nlp_embeddings():
     return _load_embedding("anime_nlp_embeddings")
 
-
 @cache
 def load_anime_compatibility_embeddings():
     return _load_embedding("anime_compatibility_embeddings")
-
 
 @cache
 def load_anime_cf_embeddings():
     return _load_embedding("anime_cf_embeddings")
 
-
 @cache
 def load_user_embeddings():
     return _load_embedding("user_embeddings")
-
 
 @cache
 def load_id_to_index():
     return _load_index("id_to_index")
 
-
 @cache
 def load_index_to_id():
     return _load_index("index_to_id")
-
 
 @cache
 def load_user_mappings():
     return _load_index("user_mappings")
 
-
 @cache
 def load_rating_stats():
     return _load_index("rating_stats")
-
 
 @cache
 def load_anime_dataset():
@@ -98,7 +88,7 @@ def load_anime_dataset():
         _download("anime-dataset.csv")
         return pd.read_csv(dataset_path, delimiter="\t", encoding="utf-8")
 
-    except UnicodeDecodeError as ex:
+    except UnicodeDecodeError:
         _logger.error(
             "Failed to decode dataset with utf-8, executing decoding attempt with latin-1"
         )

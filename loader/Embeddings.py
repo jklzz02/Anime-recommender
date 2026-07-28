@@ -8,6 +8,7 @@ from .embeddings_loader import (
 
 
 class Embeddings:
+
     @property
     def anime_cf(self):
         return load_anime_cf_embeddings()

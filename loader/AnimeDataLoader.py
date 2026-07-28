@@ -31,6 +31,7 @@ class AnimeDataLoader:
         self._id_to_index: dict[str, int] | None = None
         self._is_loaded = False
         self._load_error: str | None = None
+        self._get_anime_cached = lru_cache(maxsize=2048)(self._get_anime_uncached)
 
     def _load_id_mappings(self):
         """Load id_to_index mapping for validation"""
@@ -148,14 +149,21 @@ class AnimeDataLoader:
 
         except Exception as e:
             error_msg = f"Failed to load anime data: {e!s}"
-            logger.error(error_msg, exc_info=True)
+            logger.exception(error_msg)
             self._load_error = error_msg
             raise AnimeDataLoaderError(error_msg) from e
 
-    @lru_cache(maxsize=1024)
+    def _get_anime_uncached(self, anime_id: int) -> dict | None:
+        """Actual lookup logic, wrapped by the per-instance cache."""
+        if self._anime_dict is None:
+            self.load()
+
+        anime = self._anime_dict.get(anime_id)  # type: ignore
+        return anime.copy() if anime else None
+
     def get_anime(self, anime_id: int) -> dict | None:
         """
-        Get anime details by ID (cached).
+        Get anime details by ID (cached per instance).
 
         Args:
             anime_id: The anime ID
@@ -164,12 +172,7 @@ class AnimeDataLoader:
             Dictionary with anime details or None if not found
         """
         try:
-            if self._anime_dict is None:
-                self.load()
-
-            anime = self._anime_dict.get(anime_id)  # type: ignore
-            return anime.copy() if anime else None
-
+            return self._get_anime_cached(anime_id)
         except Exception as e:
             logger.error(f"Error getting anime {anime_id}: {e}")
             return None
@@ -184,9 +187,6 @@ class AnimeDataLoader:
         Returns:
             List of anime detail dictionaries
         """
-        if not isinstance(anime_ids, (list, tuple)):
-            logger.error(f"Invalid anime_ids type: {type(anime_ids)}")
-            return []
 
         try:
             if self._anime_dict is None:
@@ -220,10 +220,6 @@ class AnimeDataLoader:
         Returns:
             List of dicts with full anime details and optional scores
         """
-        if not isinstance(recommendations, (list, tuple)):
-            logger.error(f"Invalid recommendations type: {type(recommendations)}")
-            return []
-
         try:
             if self._anime_dict is None:
                 self.load()
@@ -303,7 +299,7 @@ class AnimeDataLoader:
 
     def get_stats(self) -> dict:
         """Get loader statistics"""
-        cache_info = self.get_anime.cache_info()
+        cache_info = self._get_anime_cached.cache_info()
         return {
             "is_loaded": self._is_loaded,
             "anime_count": self.anime_count,

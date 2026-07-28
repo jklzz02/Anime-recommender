@@ -1,3 +1,4 @@
+
 from fastapi import APIRouter, HTTPException, Query
 
 from loader import enrich_scored_recommendations
@@ -16,7 +17,6 @@ from recommender import (
 
 router = APIRouter(prefix="/v1", tags=["Collaborative filtering"])
 
-
 @router.post("/cf/recommend/user", response_model=list[int])
 def cf_recommend_for_user_ids(request: CollaborativeRecommendationRequest):
     """Get collaborative filtering recommendations as anime IDs"""
@@ -31,10 +31,7 @@ def cf_recommend_for_user_ids(request: CollaborativeRecommendationRequest):
     except HTTPException:
         raise
     except Exception as e:
-        raise HTTPException(
-            status_code=500, detail=f"Error getting CF recommendations: {e!s}"
-        )
-
+        raise HTTPException(status_code=500, detail=f"Error getting CF recommendations: {e!s}")
 
 @router.post("/cf/recommend/user/detailed", response_model=list[RecommendedAnime])
 def cf_recommend_for_user(request: CollaborativeRecommendationRequest):
@@ -56,10 +53,7 @@ def cf_recommend_for_user(request: CollaborativeRecommendationRequest):
     except HTTPException:
         raise
     except Exception as e:
-        raise HTTPException(
-            status_code=500, detail=f"Error getting CF recommendations: {e!s}"
-        )
-
+        raise HTTPException(status_code=500, detail=f"Error getting CF recommendations: {e!s}")
 
 @router.get("/cf/recommend", response_model=list[int])
 def cf_recommend_anime(
@@ -76,10 +70,7 @@ def cf_recommend_anime(
     except HTTPException:
         raise
     except Exception as e:
-        raise HTTPException(
-            status_code=500, detail=f"Error getting CF recommendations: {e!s}"
-        )
-
+        raise HTTPException(status_code=500, detail=f"Error getting CF recommendations: {e!s}")
 
 @router.get("/cf/recommend/detailed", response_model=list[RecommendedAnime])
 def cf_recommend_anime_detailed(
@@ -102,10 +93,7 @@ def cf_recommend_anime_detailed(
     except HTTPException:
         raise
     except Exception as e:
-        raise HTTPException(
-            status_code=500, detail=f"Error finding similar anime: {e!s}"
-        )
-
+        raise HTTPException(status_code=500, detail=f"Error finding similar anime: {e!s}")
 
 @router.post("/cf/predict", response_model=PredictionResponse)
 def predict_rating(
@@ -130,7 +118,6 @@ def predict_rating(
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error predicting rating: {e!s}")
 
-
 @router.post("/cf/similar/users", response_model=list[SimilarUserResponse])
 def similar_users(request: CollaborativeRecommendationRequest):
     """Find users with similar taste"""
@@ -148,6 +135,4 @@ def similar_users(request: CollaborativeRecommendationRequest):
     except HTTPException:
         raise
     except Exception as e:
-        raise HTTPException(
-            status_code=500, detail=f"Error finding similar users: {e!s}"
-        )
+        raise HTTPException(status_code=500, detail=f"Error finding similar users: {e!s}")

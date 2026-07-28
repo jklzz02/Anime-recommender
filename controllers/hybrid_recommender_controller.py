@@ -18,7 +18,6 @@ from recommender import (
 
 router = APIRouter(prefix="/v1", tags=["Hybrid recommender"])
 
-
 @router.post("/hybrid/recommend", response_model=list[DetailedRecommendedAnime])
 def hybrid_recommend(request: HybridRecommendationRequest):
     """
@@ -46,10 +45,7 @@ def hybrid_recommend(request: HybridRecommendationRequest):
     except HTTPException:
         raise
     except Exception as e:
-        raise HTTPException(
-            status_code=500, detail=f"Error getting hybrid recommendations: {e!s}"
-        )
-
+        raise HTTPException(status_code=500, detail=f"Error getting hybrid recommendations: {e!s}")
 
 @router.post("/hybrid/recommend/text", response_model=list[DetailedRecommendedAnime])
 def hybrid_recommend_with_text(request: HybridTextRecommendationRequest):
@@ -80,9 +76,8 @@ def hybrid_recommend_with_text(request: HybridTextRecommendationRequest):
     except HTTPException:
         raise
     except Exception as e:
-        raise HTTPException(
-            status_code=500, detail=f"Error getting hybrid recommendations: {e!s}"
-        )
+        raise HTTPException(status_code=500, detail=f"Error getting hybrid recommendations: {e!s}")
+
 
 
 @router.post(
@@ -98,9 +93,7 @@ def get_compatibility(request: CompatibilityRequest):
             target_anime_id=request.target_anime_id, compatibility_score=score
         )
     except Exception as e:
-        raise HTTPException(
-            status_code=500, detail=f"Error calculating compatibility: {e!s}"
-        )
+        raise HTTPException(status_code=500, detail=f"Error calculating compatibility: {e!s}")
 
 
 @router.post("/compatibility/score/detailed", tags=["Compatibility"])
@@ -118,10 +111,7 @@ def get_compatibility_detailed(request: CompatibilityRequest):
     except HTTPException:
         raise
     except Exception as e:
-        raise HTTPException(
-            status_code=500, detail=f"Error calculating compatibility: {e!s}"
-        )
-
+        raise HTTPException(status_code=500, detail=f"Error calculating compatibility: {e!s}")
 
 @router.post("/compatible", tags=["Compatibility"])
 def get_most_compatible(request: CollaborativeRecommendationRequest):
@@ -139,10 +129,7 @@ def get_most_compatible(request: CollaborativeRecommendationRequest):
         return {"data": anime_results, "scale": "1-100"}
 
     except Exception as e:
-        raise HTTPException(
-            status_code=500, detail=f"Error calculating batch compatibility: {e!s}"
-        )
-
+        raise HTTPException(status_code=500, detail=f"Error calculating batch compatibility: {e!s}")
 
 @router.post("/compatibile/detailed", tags=["Compatibility"])
 def get_compatible_detailed(request: CollaborativeRecommendationRequest):
@@ -162,6 +149,4 @@ def get_compatible_detailed(request: CollaborativeRecommendationRequest):
         return {"data": detailed_results, "scale": "1-100"}
 
     except Exception as e:
-        raise HTTPException(
-            status_code=500, detail=f"Error calculating batch compatibility: {e!s}"
-        )
+        raise HTTPException(status_code=500, detail=f"Error calculating batch compatibility: {e!s}")

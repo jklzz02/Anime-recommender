@@ -23,9 +23,10 @@ from .embeddings_loader import (
     load_user_mappings,
 )
 from .Mappings import Mappings
-from .transformer_loader import get_transformer
+from .transformer_loader import DEFAULT_MODEL, get_transformer
 
 __all__ = [
+    "DEFAULT_MODEL",
     "AnimeDataLoader",
     "AnimeDataLoaderError",
     "Embeddings",

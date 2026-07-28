@@ -41,6 +41,6 @@ def health_check(request: Request):
         else "degraded",
         "version": settings.version,
         "anime_loader": loader_status,
-        "datasets": data_status,
-        "endpoints": endpoints,
+        "datasets" : data_status,
+        "endpoints": endpoints
     }

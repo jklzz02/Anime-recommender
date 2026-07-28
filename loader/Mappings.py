@@ -7,6 +7,7 @@ from .embeddings_loader import (
 
 
 class Mappings:
+
     @property
     def id_to_index(self):
         return load_id_to_index()
